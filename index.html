@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lake House 🏡</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #1a1a1a; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+
+    #app { width: 900px; height: 600px; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #333; }
+
+    #game-canvas { width: 100%; height: 100%; position: relative; cursor: crosshair; }
+
+    /* ---- Scene ---- */
+    .sky { position: absolute; top: 0; left: 0; right: 0; height: 45%; background: linear-gradient(to bottom, #87CEEB, #b8dff7); }
+    .sun { position: absolute; top: 22px; right: 70px; width: 40px; height: 40px; background: #f9d74a; border-radius: 50%; box-shadow: 0 0 20px #f9d74a88; }
+    .cloud { position: absolute; background: #fff; border-radius: 20px; opacity: 0.9; }
+    .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 55%; background: linear-gradient(to bottom, #7ab648, #5a9633); }
+    .lake { position: absolute; bottom: 11%; left: 7%; width: 86%; height: 24%; background: linear-gradient(to bottom, #4aa8e8, #3388cc); border-radius: 50% / 40%; opacity: 0.9; }
+    .lake-shine { position: absolute; bottom: 18%; left: 22%; width: 28%; height: 5%; background: rgba(255,255,255,0.3); border-radius: 50%; transform: rotate(-4deg); }
+    .dock { position: absolute; bottom: 27%; left: 50%; transform: translateX(-50%); width: 76px; height: 13px; background: #8B5E3C; border-radius: 3px; }
+    .dock-post { position: absolute; bottom: 25.5%; width: 6px; height: 22px; background: #6B4423; border-radius: 2px; }
+    /* House */
+    .house { position: absolute; bottom: 54.5%; right: 7%; }
+    .house-body { width: 90px; height: 56px; background: #e8c98a; border: 1.5px solid #c9a96e; border-radius: 3px; position: relative; }
+    .house-roof { width: 0; height: 0; border-left: 49px solid transparent; border-right: 49px solid transparent; border-bottom: 32px solid #c0443c; position: absolute; top: -30px; left: -4px; }
+    .house-door { width: 18px; height: 26px; background: #8B5E3C; border-radius: 3px 3px 0 0; position: absolute; bottom: 0; left: 36px; }
+    .house-window { width: 18px; height: 15px; background: #add8f7; border: 1.5px solid #6B9BB5; border-radius: 2px; position: absolute; top: 14px; left: 8px; }
+    .house-window2 { width: 18px; height: 15px; background: #add8f7; border: 1.5px solid #6B9BB5; border-radius: 2px; position: absolute; top: 14px; right: 8px; }
+    .scene-label { font-size: 9px; color: #666; text-align: center; margin-top: 3px; }
+    /* DJ */
+    .dj-booth { position: absolute; bottom: 54.5%; left: 5%; }
+    .dj-table { width: 52px; height: 30px; background: #222; border-radius: 5px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid #444; }
+    .dj-disc { width: 16px; height: 16px; background: #111; border-radius: 50%; border: 3px solid #e44; }
+    .dj-disc2 { width: 16px; height: 16px; background: #111; border-radius: 50%; border: 3px solid #4ae; }
+    /* Fishing */
+    .fish-area { position: absolute; bottom: 30%; right: 13%; display: flex; flex-direction: column; align-items: center; }
+    .fish-rod { width: 3px; height: 32px; background: #6B4423; transform: rotate(18deg); transform-origin: bottom; border-radius: 2px; }
+    .fish-line { position: absolute; top: 3px; left: 1px; width: 1px; height: 26px; background: #bbb; transform: rotate(-8deg); }
+    /* Campfire */
+    .campfire { position: absolute; bottom: 56%; left: 28%; }
+    .fire-base { width: 22px; height: 8px; background: #8B5E3C; border-radius: 3px; }
+    .fire { width: 14px; height: 18px; background: #e55; border-radius: 50% 50% 30% 30%; position: absolute; top: -16px; left: 4px; animation: flicker 0.8s ease-in-out infinite alternate; }
+    .fire-inner { width: 8px; height: 12px; background: #fa0; border-radius: 50% 50% 30% 30%; position: absolute; top: -11px; left: 7px; animation: flicker 0.6s ease-in-out infinite alternate-reverse; }
+    @keyframes flicker { from { transform: scaleX(1) scaleY(1); } to { transform: scaleX(0.85) scaleY(1.1); } }
+    /* Boat */
+    .boat { position: absolute; bottom: 17%; left: 28%; }
+    .boat-body { width: 40px; height: 12px; background: #c0443c; border-radius: 3px 3px 8px 8px; border: 1px solid #a03530; }
+    .boat-sail { width: 0; height: 0; border-left: 12px solid transparent; border-right: 0; border-bottom: 24px solid #eee; position: absolute; top: -24px; left: 20px; }
+
+    /* ---- Players ---- */
+    #players-layer { position: absolute; inset: 0; pointer-events: none; }
+    .player { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 2px; transform: translate(-50%, -100%); transition: left 0.15s ease, bottom 0.15s ease; pointer-events: none; }
+    .player-bubble { font-size: 11px; background: white; border: 1px solid #ddd; padding: 3px 8px; border-radius: 12px; max-width: 110px; text-align: center; word-break: break-word; margin-bottom: 3px; color: #222; line-height: 1.3; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .avatar-head { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.15); }
+    .avatar-body { width: 22px; height: 24px; border-radius: 6px 6px 4px 4px; opacity: 0.8; margin-top: -1px; }
+    .player-name { font-size: 10px; font-weight: 600; color: #222; background: rgba(255,255,255,0.85); padding: 1px 6px; border-radius: 8px; white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ---- Zone label ---- */
+    #zone-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 13px; color: #fff; background: rgba(0,0,0,0.55); padding: 6px 14px; border-radius: 20px; pointer-events: none; display: none; }
+
+    /* ---- Chat ---- */
+    #chat-panel { position: absolute; bottom: 14px; right: 14px; width: 230px; display: flex; flex-direction: column; gap: 6px; z-index: 5; }
+    #chat-messages { background: rgba(255,255,255,0.92); border-radius: 10px; border: 1px solid #ddd; height: 140px; overflow-y: auto; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
+    .chat-msg { font-size: 12px; line-height: 1.4; color: #222; }
+    .msg-system { color: #888; font-style: italic; }
+    #chat-input-row { display: flex; gap: 6px; }
+    #chat-input { flex: 1; font-size: 13px; padding: 7px 10px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #111; outline: none; }
+    #chat-input:focus { border-color: #888; }
+    #chat-send { font-size: 12px; padding: 7px 12px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #222; cursor: pointer; white-space: nowrap; }
+    #chat-send:hover { background: #f0f0f0; }
+
+    /* ---- HUD ---- */
+    #hud { position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; z-index: 5; pointer-events: none; }
+    #player-count { font-size: 11px; color: #fff; background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 20px; }
+    #status-dot { font-size: 11px; color: #fff; background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 20px; }
+
+    /* ---- Login ---- */
+    #login-panel { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.55); z-index: 20; }
+    .login-card { background: #fff; border-radius: 14px; padding: 2rem; width: 290px; display: flex; flex-direction: column; gap: 14px; }
+    .login-card h2 { font-size: 20px; font-weight: 600; color: #111; }
+    .login-card p { font-size: 13px; color: #666; line-height: 1.5; }
+    .login-card input { font-size: 14px; padding: 9px 12px; border-radius: 8px; border: 1px solid #ccc; outline: none; color: #111; }
+    .login-card input:focus { border-color: #888; }
+    .color-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: border-color 0.15s, transform 0.1s; }
+    .color-swatch:hover { transform: scale(1.1); }
+    .color-swatch.selected { border-color: #111; }
+    #join-btn { padding: 11px; border-radius: 8px; border: none; background: #222; color: #fff; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s; }
+    #join-btn:hover { background: #444; }
+    #ws-url-note { font-size: 11px; color: #999; text-align: center; }
+
+    /* Responsive */
+    @media (max-width: 920px) { #app { width: 100vw; height: 100vh; border-radius: 0; } }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="game-canvas">
+    <!-- Scene -->
+    <div class="sky">
+      <div class="sun"></div>
+      <div class="cloud" style="top:18px;left:90px;width:65px;height:20px;"></div>
+      <div class="cloud" style="top:12px;left:150px;width:38px;height:13px;"></div>
+      <div class="cloud" style="top:32px;left:230px;width:85px;height:22px;"></div>
+      <div class="cloud" style="top:20px;left:400px;width:55px;height:16px;"></div>
+      <div class="cloud" style="top:38px;left:550px;width:70px;height:19px;"></div>
+      <div class="cloud" style="top:14px;left:700px;width:45px;height:14px;"></div>
+    </div>
+    <div id="trees-row" style="position:absolute;bottom:54%;left:0;right:0;height:130px;display:flex;align-items:flex-end;overflow:hidden;"></div>
+    <div class="ground"></div>
+    <div class="lake"></div>
+    <div class="lake-shine"></div>
+    <div class="dock-post" style="left:46%;"></div>
+    <div class="dock-post" style="left:52%;"></div>
+    <div class="dock"></div>
+    <!-- Boat -->
+    <div class="boat"><div class="boat-body"><div class="boat-sail"></div></div></div>
+    <!-- House -->
+    <div class="house">
+      <div class="house-body">
+        <div class="house-roof"></div>
+        <div class="house-door"></div>
+        <div class="house-window"></div>
+        <div class="house-window2"></div>
+      </div>
+      <div class="scene-label">lake house</div>
+    </div>
+    <!-- DJ Booth -->
+    <div class="dj-booth">
+      <div class="dj-table"><div class="dj-disc"></div><div class="dj-disc2"></div></div>
+      <div class="scene-label">dj booth</div>
+    </div>
+    <!-- Campfire -->
+    <div class="campfire">
+      <div class="fire-inner"></div>
+      <div class="fire"></div>
+      <div class="fire-base"></div>
+      <div class="scene-label">fire pit</div>
+    </div>
+    <!-- Fishing -->
+    <div class="fish-area">
+      <div class="fish-rod"><div class="fish-line"></div></div>
+      <div class="scene-label">fishing</div>
+    </div>
+
+    <!-- Players -->
+    <div id="players-layer"></div>
+    <div id="zone-label"></div>
+
+    <!-- HUD -->
+    <div id="hud">
+      <div id="player-count">1 online</div>
+      <div id="status-dot">connecting...</div>
+    </div>
+
+    <!-- Chat -->
+    <div id="chat-panel">
+      <div id="chat-messages"></div>
+      <div id="chat-input-row">
+        <input id="chat-input" type="text" placeholder="say something..." maxlength="100" />
+        <button id="chat-send">send</button>
+      </div>
+    </div>
+
+    <!-- Login -->
+    <div id="login-panel">
+      <div class="login-card">
+        <h2>🏡 Lake House</h2>
+        <p>Pick your name and color, then hop in. Anyone with this link is in the same room.</p>
+        <input id="name-input" type="text" placeholder="your name" maxlength="16" />
+        <div class="color-row" id="color-picker"></div>
+        <button id="join-btn">join the hangout</button>
+        <div id="ws-url-note">connecting to server...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+// After deploying server.ts to Deno Deploy, paste your project URL here:
+// e.g. "wss://lakehouse-server.deno.dev/ws"
+const WS_URL = "YOUR_DENO_DEPLOY_URL_HERE/ws";
+// ─────────────────────────────────────────────────────────────────────────────
+
+const COLORS = ['#e05c5c','#e07c3a','#e0c040','#4db86e','#3a9ad9','#9b59e0','#e05cb0','#5cd4d4','#ff8c42','#a8e6cf'];
+
+const ZONES = {
+  house:    { label: 'chilling inside the lake house', x:[78,96], y:[38,62] },
+  dj:       { label: 'at the dj booth',                x:[4,18],  y:[38,62] },
+  dock:     { label: 'on the dock',                    x:[43,58], y:[24,36] },
+  lake:     { label: 'out on the lake',                x:[12,80], y:[8,28]  },
+  campfire: { label: 'around the fire pit',            x:[24,38], y:[46,62] },
+  fishing:  { label: 'fishing off the dock',           x:[80,94], y:[24,36] },
+};
+
+let me = null;
+let players = {};
+let ws = null;
+let myBubbleTimer = null;
+
+const $ = id => document.getElementById(id);
+
+// ── Build trees ───────────────────────────────────────────────────────────────
+const treesRow = $('trees-row');
+for (let i = 0; i < 36; i++) {
+  const h = 45 + Math.random() * 65;
+  const w = 20 + Math.random() * 16;
+  const g = document.createElement('div');
+  g.style.cssText = `display:inline-flex;flex-direction:column;align-items:center;margin-right:${-6 + Math.random()*4}px;flex-shrink:0;`;
+  g.innerHTML = `<div style="width:0;height:0;border-left:${w/2}px solid transparent;border-right:${w/2}px solid transparent;border-bottom:${h*0.62}px solid ${Math.random()>0.5?'#2e7d32':'#1b5e20'};"></div><div style="width:${w*0.22}px;height:${h*0.32}px;background:#5d4037;border-radius:1px;"></div>`;
+  treesRow.appendChild(g);
+}
+
+// ── Color picker ──────────────────────────────────────────────────────────────
+let chosenColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+const cp = $('color-picker');
+COLORS.forEach(c => {
+  const sw = document.createElement('div');
+  sw.className = 'color-swatch' + (c === chosenColor ? ' selected' : '');
+  sw.style.background = c;
+  sw.onclick = () => {
+    chosenColor = c;
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+    sw.classList.add('selected');
+  };
+  cp.appendChild(sw);
+});
+
+// ── WebSocket ─────────────────────────────────────────────────────────────────
+function connectWS() {
+  if (WS_URL.includes("YOUR_DENO")) {
+    $('status-dot').textContent = '⚠ set WS_URL';
+    $('ws-url-note').textContent = '⚠ paste your Deno Deploy URL in index.html';
+    useBroadcastFallback();
+    return;
+  }
+  try {
+    ws = new WebSocket(WS_URL);
+    ws.onopen = () => {
+      $('status-dot').textContent = '● online';
+      $('status-dot').style.background = 'rgba(50,180,80,0.5)';
+      $('ws-url-note').textContent = 'connected!';
+      if (me) ws.send(JSON.stringify({ type: 'join', player: { ...me } }));
+    };
+    ws.onmessage = (e) => handleMsg(JSON.parse(e.data));
+    ws.onclose = () => {
+      $('status-dot').textContent = '○ reconnecting...';
+      setTimeout(connectWS, 3000);
+    };
+    ws.onerror = () => ws.close();
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+function send(msg) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
+  // Also broadcast locally (same browser tabs)
+  try { bc && bc.postMessage(msg); } catch(_) {}
+}
+
+// ── BroadcastChannel fallback (same device, multiple tabs) ────────────────────
+let bc = null;
+try { bc = new BroadcastChannel('lakehouse-v2'); } catch(_) {}
+function useBroadcastFallback() {
+  $('status-dot').textContent = '● local mode';
+  if (bc) bc.onmessage = (e) => handleMsg(e.data);
+}
+if (bc && WS_URL.includes("YOUR_DENO")) {
+  bc.onmessage = (e) => handleMsg(e.data);
+}
+
+// ── Message handler ───────────────────────────────────────────────────────────
+function handleMsg(msg) {
+  if (msg.type === 'join' || msg.type === 'move') {
+    const isNew = !players[msg.player.id];
+    players[msg.player.id] = { ...players[msg.player.id], ...msg.player };
+    if (msg.type === 'join' && isNew && msg.player.id !== me?.id) {
+      addChatMsg(null, `${msg.player.name} joined the lake house`, true);
+    }
+    renderPlayers();
+  } else if (msg.type === 'leave') {
+    const p = players[msg.id];
+    if (p && msg.id !== me?.id) {
+      addChatMsg(null, `${p.name} left`, true);
+      delete players[msg.id];
+      renderPlayers();
+    }
+  } else if (msg.type === 'chat') {
+    const p = players[msg.id];
+    if (p) {
+      addChatMsg(msg.id, msg.text);
+      players[msg.id].bubble = msg.text;
+      renderPlayers();
+      if (players[msg.id]._bubbleTimer) clearTimeout(players[msg.id]._bubbleTimer);
+      players[msg.id]._bubbleTimer = setTimeout(() => {
+        if (players[msg.id]) { players[msg.id].bubble = null; renderPlayers(); }
+      }, 6000);
+    }
+  }
+}
+
+// ── Render players ────────────────────────────────────────────────────────────
+function renderPlayers() {
+  const layer = $('players-layer');
+  const existing = {};
+  layer.querySelectorAll('.player').forEach(el => existing[el.dataset.pid] = el);
+  const seen = new Set();
+  Object.values(players).forEach(p => {
+    seen.add(p.id);
+    let el = existing[p.id];
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'player';
+      el.dataset.pid = p.id;
+      el.innerHTML = `
+        <div class="player-bubble" data-bubble style="display:none;"></div>
+        <div class="avatar-head" data-head style="background:${p.color};"></div>
+        <div class="avatar-body" data-body style="background:${p.color};"></div>
+        <div class="player-name" data-name>${escHtml(p.name)}</div>`;
+      layer.appendChild(el);
+    }
+    el.style.left = p.x + '%';
+    el.style.bottom = p.y + '%';
+    el.querySelector('[data-head]').style.background = p.color;
+    el.querySelector('[data-body]').style.background = p.color;
+    el.querySelector('[data-name]').textContent = p.name;
+    const bubble = el.querySelector('[data-bubble]');
+    if (p.bubble) { bubble.textContent = p.bubble; bubble.style.display = 'block'; }
+    else bubble.style.display = 'none';
+  });
+  Object.keys(existing).forEach(pid => { if (!seen.has(pid)) existing[pid].remove(); });
+  $('player-count').textContent = Object.keys(players).length + ' online';
+}
+
+// ── Zone detection ────────────────────────────────────────────────────────────
+function getZone(x, y) {
+  for (const [, z] of Object.entries(ZONES)) {
+    if (x >= z.x[0] && x <= z.x[1] && y >= z.y[0] && y <= z.y[1]) return z.label;
+  }
+  return null;
+}
+
+// ── Click to move ─────────────────────────────────────────────────────────────
+$('game-canvas').addEventListener('click', e => {
+  if (!me) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = Math.max(2, Math.min(97, ((e.clientX - rect.left) / rect.width) * 100));
+  const y = Math.max(8, Math.min(66, (1 - (e.clientY - rect.top) / rect.height) * 100));
+  me.x = x; me.y = y;
+  players[me.id] = { ...me };
+  send({ type: 'move', player: { ...me } });
+  renderPlayers();
+  const zone = getZone(x, y);
+  if (zone) {
+    const zl = $('zone-label');
+    zl.textContent = zone;
+    zl.style.display = 'block';
+    clearTimeout(zl._t);
+    zl._t = setTimeout(() => zl.style.display = 'none', 2500);
+  }
+});
+
+// ── Chat ──────────────────────────────────────────────────────────────────────
+function sendChat() {
+  const inp = $('chat-input');
+  const txt = inp.value.trim();
+  if (!txt || !me) return;
+  inp.value = '';
+  me.bubble = txt;
+  players[me.id] = { ...me };
+  addChatMsg(me.id, txt);
+  send({ type: 'chat', id: me.id, text: txt });
+  renderPlayers();
+  if (myBubbleTimer) clearTimeout(myBubbleTimer);
+  myBubbleTimer = setTimeout(() => {
+    if (me) { me.bubble = null; players[me.id] = { ...me }; renderPlayers(); }
+  }, 6000);
+}
+$('chat-send').onclick = sendChat;
+$('chat-input').onkeydown = e => { if (e.key === 'Enter') sendChat(); };
+
+function addChatMsg(name, text, isSystem = false) {
+  const box = $('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg';
+  if (isSystem) {
+    div.innerHTML = `<span class="msg-system">${escHtml(text)}</span>`;
+  } else {
+    const color = players[name]?.color || '#888';
+    div.innerHTML = `<span style="font-weight:600;color:${color};">${escHtml(players[name]?.name || name)}</span> ${escHtml(text)}`;
+  }
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  if (box.children.length > 100) box.removeChild(box.children[0]);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Join ──────────────────────────────────────────────────────────────────────
+$('join-btn').onclick = () => {
+  const name = $('name-input').value.trim() || 'anon';
+  me = {
+    id: name + '_' + Math.random().toString(36).slice(2, 7),
+    name,
+    color: chosenColor,
+    x: 25 + Math.random() * 50,
+    y: 32 + Math.random() * 18,
+    bubble: null
+  };
+  players[me.id] = { ...me };
+  $('login-panel').style.display = 'none';
+  connectWS();
+  send({ type: 'join', player: { ...me } });
+  addChatMsg(null, `you joined as ${name} — click anywhere to move!`, true);
+  renderPlayers();
+  // Heartbeat
+  setInterval(() => { if (me) send({ type: 'join', player: { ...me } }); }, 10000);
+  window.addEventListener('beforeunload', () => { if (me) send({ type: 'leave', id: me.id }); });
+};
+$('name-input').onkeydown = e => { if (e.key === 'Enter') $('join-btn').click(); };
+
+// Init WS URL note
+$('ws-url-note').textContent = WS_URL.includes('YOUR_DENO')
+  ? '⚠ paste your Deno Deploy URL in WS_URL'
+  : 'connecting...';
+</script>
+</body>
+</html>
