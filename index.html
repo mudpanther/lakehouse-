@@ -1,551 +1,894 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lake House 🏡</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #1a1a1a; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Lake House 🏡</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,sans-serif;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden;}
 
-    #app { width: 900px; height: 600px; position: relative; overflow: hidden; border-radius: 12px; border: 1px solid #333; }
+#wrapper{display:flex;width:100vw;height:100vh;}
 
-    #game-canvas { width: 100%; height: 100%; position: relative; cursor: crosshair; }
+/* ── Sidebar ── */
+#sidebar{width:190px;min-width:190px;background:#16162a;border-right:1px solid #2a2a4a;display:flex;flex-direction:column;z-index:20;}
+#sb-header{padding:12px 10px 8px;border-bottom:1px solid #2a2a4a;}
+#sb-header h2{font-size:14px;font-weight:700;color:#fff;}
+#sb-header p{font-size:10px;color:#556688;margin-top:2px;}
+#online-list{flex:1;overflow-y:auto;padding:6px 4px;}
+#online-list::-webkit-scrollbar{width:3px;}
+#online-list::-webkit-scrollbar-thumb{background:#2a2a4a;}
+.sb-section{font-size:9px;color:#445;padding:6px 6px 3px;text-transform:uppercase;letter-spacing:0.08em;}
+.sb-player{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:7px;transition:background 0.1s;}
+.sb-player:hover{background:rgba(255,255,255,0.05);}
+.sb-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;border:1.5px solid rgba(255,255,255,0.2);}
+.sb-info{flex:1;min-width:0;}
+.sb-name{font-size:11px;font-weight:600;color:#ccd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-status{font-size:9px;color:#556688;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-act{font-size:12px;flex-shrink:0;}
+#sb-footer{padding:8px;border-top:1px solid #2a2a4a;font-size:9px;color:#334;text-align:center;}
 
-    /* ---- Scene ---- */
-    .sky { position: absolute; top: 0; left: 0; right: 0; height: 45%; background: linear-gradient(to bottom, #87CEEB, #b8dff7); }
-    .sun { position: absolute; top: 22px; right: 70px; width: 40px; height: 40px; background: #f9d74a; border-radius: 50%; box-shadow: 0 0 20px #f9d74a88; }
-    .cloud { position: absolute; background: #fff; border-radius: 20px; opacity: 0.9; }
-    .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 55%; background: linear-gradient(to bottom, #7ab648, #5a9633); }
-    .lake { position: absolute; bottom: 11%; left: 7%; width: 86%; height: 24%; background: linear-gradient(to bottom, #4aa8e8, #3388cc); border-radius: 50% / 40%; opacity: 0.9; }
-    .lake-shine { position: absolute; bottom: 18%; left: 22%; width: 28%; height: 5%; background: rgba(255,255,255,0.3); border-radius: 50%; transform: rotate(-4deg); }
-    .dock { position: absolute; bottom: 27%; left: 50%; transform: translateX(-50%); width: 76px; height: 13px; background: #8B5E3C; border-radius: 3px; }
-    .dock-post { position: absolute; bottom: 25.5%; width: 6px; height: 22px; background: #6B4423; border-radius: 2px; }
-    /* House */
-    .house { position: absolute; bottom: 54.5%; right: 7%; }
-    .house-body { width: 90px; height: 56px; background: #e8c98a; border: 1.5px solid #c9a96e; border-radius: 3px; position: relative; }
-    .house-roof { width: 0; height: 0; border-left: 49px solid transparent; border-right: 49px solid transparent; border-bottom: 32px solid #c0443c; position: absolute; top: -30px; left: -4px; }
-    .house-door { width: 18px; height: 26px; background: #8B5E3C; border-radius: 3px 3px 0 0; position: absolute; bottom: 0; left: 36px; }
-    .house-window { width: 18px; height: 15px; background: #add8f7; border: 1.5px solid #6B9BB5; border-radius: 2px; position: absolute; top: 14px; left: 8px; }
-    .house-window2 { width: 18px; height: 15px; background: #add8f7; border: 1.5px solid #6B9BB5; border-radius: 2px; position: absolute; top: 14px; right: 8px; }
-    .scene-label { font-size: 9px; color: #666; text-align: center; margin-top: 3px; }
-    /* DJ */
-    .dj-booth { position: absolute; bottom: 54.5%; left: 5%; }
-    .dj-table { width: 52px; height: 30px; background: #222; border-radius: 5px; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid #444; }
-    .dj-disc { width: 16px; height: 16px; background: #111; border-radius: 50%; border: 3px solid #e44; }
-    .dj-disc2 { width: 16px; height: 16px; background: #111; border-radius: 50%; border: 3px solid #4ae; }
-    /* Fishing */
-    .fish-area { position: absolute; bottom: 30%; right: 13%; display: flex; flex-direction: column; align-items: center; }
-    .fish-rod { width: 3px; height: 32px; background: #6B4423; transform: rotate(18deg); transform-origin: bottom; border-radius: 2px; }
-    .fish-line { position: absolute; top: 3px; left: 1px; width: 1px; height: 26px; background: #bbb; transform: rotate(-8deg); }
-    /* Campfire */
-    .campfire { position: absolute; bottom: 56%; left: 28%; }
-    .fire-base { width: 22px; height: 8px; background: #8B5E3C; border-radius: 3px; }
-    .fire { width: 14px; height: 18px; background: #e55; border-radius: 50% 50% 30% 30%; position: absolute; top: -16px; left: 4px; animation: flicker 0.8s ease-in-out infinite alternate; }
-    .fire-inner { width: 8px; height: 12px; background: #fa0; border-radius: 50% 50% 30% 30%; position: absolute; top: -11px; left: 7px; animation: flicker 0.6s ease-in-out infinite alternate-reverse; }
-    @keyframes flicker { from { transform: scaleX(1) scaleY(1); } to { transform: scaleX(0.85) scaleY(1.1); } }
-    /* Boat */
-    .boat { position: absolute; bottom: 17%; left: 28%; }
-    .boat-body { width: 40px; height: 12px; background: #c0443c; border-radius: 3px 3px 8px 8px; border: 1px solid #a03530; }
-    .boat-sail { width: 0; height: 0; border-left: 12px solid transparent; border-right: 0; border-bottom: 24px solid #eee; position: absolute; top: -24px; left: 20px; }
+/* ── Main ── */
+#main{flex:1;position:relative;overflow:hidden;}
+#game-canvas{width:100%;height:100%;position:relative;cursor:crosshair;}
 
-    /* ---- Players ---- */
-    #players-layer { position: absolute; inset: 0; pointer-events: none; }
-    .player { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 2px; transform: translate(-50%, -100%); transition: left 0.15s ease, bottom 0.15s ease; pointer-events: none; }
-    .player-bubble { font-size: 11px; background: white; border: 1px solid #ddd; padding: 3px 8px; border-radius: 12px; max-width: 110px; text-align: center; word-break: break-word; margin-bottom: 3px; color: #222; line-height: 1.3; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-    .avatar-head { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.15); }
-    .avatar-body { width: 22px; height: 24px; border-radius: 6px 6px 4px 4px; opacity: 0.8; margin-top: -1px; }
-    .player-name { font-size: 10px; font-weight: 600; color: #222; background: rgba(255,255,255,0.85); padding: 1px 6px; border-radius: 8px; white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+/* ── Scene ── */
+.sky{position:absolute;top:0;left:0;right:0;height:44%;background:linear-gradient(to bottom,#87ceeb,#b8e4f9);}
+.sun{position:absolute;top:20px;right:80px;width:42px;height:42px;background:#f9d74a;border-radius:50%;box-shadow:0 0 24px #f9d74a66;}
+.cloud{position:absolute;background:#fff;border-radius:20px;opacity:.88;}
+.ground{position:absolute;left:0;right:0;bottom:0;height:56%;background:linear-gradient(to bottom,#7ab648,#5a9633);}
+.lake{position:absolute;bottom:10%;left:6%;width:88%;height:26%;background:linear-gradient(160deg,#4aa8e8,#2277bb);border-radius:50%/38%;opacity:.92;}
+.lake-shine{position:absolute;bottom:19%;left:20%;width:26%;height:5%;background:rgba(255,255,255,.28);border-radius:50%;transform:rotate(-4deg);}
+.dock{position:absolute;bottom:27%;left:50%;transform:translateX(-50%);width:80px;height:14px;background:#8b5e3c;border-radius:3px;}
+.dock-post{position:absolute;bottom:25%;width:7px;height:24px;background:#6b4423;border-radius:2px;}
 
-    /* ---- Zone label ---- */
-    #zone-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 13px; color: #fff; background: rgba(0,0,0,0.55); padding: 6px 14px; border-radius: 20px; pointer-events: none; display: none; }
+/* House */
+.house{position:absolute;bottom:54%;right:6%;}
+.house-body{width:100px;height:62px;background:#e8c98a;border:1.5px solid #c9a96e;border-radius:3px;position:relative;}
+.house-roof{width:0;height:0;border-left:54px solid transparent;border-right:54px solid transparent;border-bottom:36px solid #c0443c;position:absolute;top:-34px;left:-4px;}
+.house-door{width:20px;height:28px;background:#8b5e3c;border-radius:3px 3px 0 0;position:absolute;bottom:0;left:40px;}
+.house-win{width:19px;height:16px;background:#add8f7;border:1.5px solid #6b9bb5;border-radius:2px;position:absolute;top:14px;}
+.basement-door{position:absolute;bottom:54%;right:9%;width:14px;height:20px;background:#3a2a1a;border-radius:2px 2px 0 0;border:1px solid #5a3a2a;cursor:pointer;}
+.basement-door:hover{background:#4a3a2a;}
+.basement-label{position:absolute;bottom:53%;right:7.5%;font-size:8px;color:#8a6a4a;text-align:center;}
 
-    /* ---- Chat ---- */
-    #chat-panel { position: absolute; bottom: 14px; right: 14px; width: 230px; display: flex; flex-direction: column; gap: 6px; z-index: 5; }
-    #chat-messages { background: rgba(255,255,255,0.92); border-radius: 10px; border: 1px solid #ddd; height: 140px; overflow-y: auto; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
-    .chat-msg { font-size: 12px; line-height: 1.4; color: #222; }
-    .msg-system { color: #888; font-style: italic; }
-    #chat-input-row { display: flex; gap: 6px; }
-    #chat-input { flex: 1; font-size: 13px; padding: 7px 10px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #111; outline: none; }
-    #chat-input:focus { border-color: #888; }
-    #chat-send { font-size: 12px; padding: 7px 12px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #222; cursor: pointer; white-space: nowrap; }
-    #chat-send:hover { background: #f0f0f0; }
+/* DJ */
+.dj-booth{position:absolute;bottom:54%;left:4%;}
+.dj-table{width:58px;height:34px;background:#1a1a1a;border-radius:6px;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #333;}
+.dj-disc{width:17px;height:17px;background:#111;border-radius:50%;}
+.now-playing{position:absolute;bottom:66%;left:2%;font-size:9px;color:#4ae;background:rgba(0,0,0,.6);padding:3px 7px;border-radius:8px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none;}
 
-    /* ---- HUD ---- */
-    #hud { position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; z-index: 5; pointer-events: none; }
-    #player-count { font-size: 11px; color: #fff; background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 20px; }
-    #status-dot { font-size: 11px; color: #fff; background: rgba(0,0,0,0.4); padding: 4px 10px; border-radius: 20px; }
+/* Bar */
+.bar{position:absolute;bottom:54%;left:22%;}
+.bar-counter{width:72px;height:28px;background:#5a3010;border-radius:4px 4px 0 0;border:1px solid #7a4020;display:flex;align-items:center;justify-content:center;gap:5px;}
+.bar-bottle{width:6px;height:16px;background:#3a7a3a;border-radius:2px 2px 0 0;}
+.bar-bottle2{width:6px;height:14px;background:#8a3a10;border-radius:2px 2px 0 0;}
+.bar-bottle3{width:6px;height:18px;background:#3a3a8a;border-radius:2px 2px 0 0;}
 
-    /* ---- Login ---- */
-    #login-panel { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.55); z-index: 20; }
-    .login-card { background: #fff; border-radius: 14px; padding: 2rem; width: 290px; display: flex; flex-direction: column; gap: 14px; }
-    .login-card h2 { font-size: 20px; font-weight: 600; color: #111; }
-    .login-card p { font-size: 13px; color: #666; line-height: 1.5; }
-    .login-card input { font-size: 14px; padding: 9px 12px; border-radius: 8px; border: 1px solid #ccc; outline: none; color: #111; }
-    .login-card input:focus { border-color: #888; }
-    .color-row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: border-color 0.15s, transform 0.1s; }
-    .color-swatch:hover { transform: scale(1.1); }
-    .color-swatch.selected { border-color: #111; }
-    #join-btn { padding: 11px; border-radius: 8px; border: none; background: #222; color: #fff; cursor: pointer; font-size: 14px; font-weight: 500; transition: background 0.15s; }
-    #join-btn:hover { background: #444; }
-    #ws-url-note { font-size: 11px; color: #999; text-align: center; }
+/* Game table */
+.game-table{position:absolute;bottom:54%;left:42%;}
+.game-board{width:44px;height:44px;border-radius:4px;overflow:hidden;display:grid;grid-template-columns:repeat(4,1fr);cursor:pointer;border:2px solid #8a6a3a;}
+.game-board:hover{border-color:#aa8a5a;}
+.gb-light{background:#f0d9a0;}
+.gb-dark{background:#8a5a2a;}
 
-    /* ---- Activity Menu ---- */
-    #activity-btn { position: absolute; bottom: 14px; left: 14px; z-index: 5; padding: 8px 14px; border-radius: 20px; border: 1px solid #555; background: rgba(30,30,30,0.85); color: #fff; font-size: 13px; cursor: pointer; transition: background 0.15s; }
-    #activity-btn:hover { background: rgba(60,60,60,0.95); }
-    #activity-menu { position: absolute; bottom: 52px; left: 14px; z-index: 10; background: rgba(20,20,20,0.95); border: 1px solid #444; border-radius: 12px; padding: 10px; display: none; flex-direction: column; gap: 6px; min-width: 190px; }
-    #activity-menu.open { display: flex; }
-    .act-section { font-size: 10px; color: #888; padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .act-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid #333; background: transparent; color: #eee; font-size: 13px; cursor: pointer; text-align: left; transition: background 0.1s; }
-    .act-btn:hover { background: rgba(255,255,255,0.1); }
-    .act-btn.has-sub::after { content: " ›"; color: #888; }
-    .act-sub { display: none; flex-direction: column; gap: 4px; padding-left: 10px; border-left: 1px solid #333; margin-left: 6px; }
-    .act-sub.open { display: flex; }
-    .act-clear { padding: 6px 12px; border-radius: 8px; border: 1px solid #553333; background: transparent; color: #e88; font-size: 12px; cursor: pointer; text-align: left; margin-top: 4px; }
-    .act-clear:hover { background: rgba(255,80,80,0.1); }
-    .player-activity { font-size: 16px; line-height: 1; margin-bottom: 2px; }
-    /* Responsive */
-    @media (max-width: 920px) { #app { width: 100vw; height: 100vh; border-radius: 0; } }
-  </style>
+/* Campfire */
+.campfire{position:absolute;bottom:57%;left:62%;}
+.fire-base{width:24px;height:9px;background:#8b5e3c;border-radius:3px;position:relative;}
+.fire{width:14px;height:20px;background:#e55;border-radius:50% 50% 30% 30%;position:absolute;top:-18px;left:5px;animation:flicker .8s ease-in-out infinite alternate;}
+.fire-in{width:8px;height:13px;background:#fa0;border-radius:50% 50% 30% 30%;position:absolute;top:-12px;left:8px;animation:flicker .5s ease-in-out infinite alternate-reverse;}
+@keyframes flicker{from{transform:scaleX(1) scaleY(1);}to{transform:scaleX(.85) scaleY(1.12);}}
+
+/* Fishing */
+.fish-area{position:absolute;bottom:30%;right:10%;display:flex;flex-direction:column;align-items:center;}
+.fish-rod{width:3px;height:34px;background:#6b4423;transform:rotate(18deg);transform-origin:bottom;border-radius:2px;position:relative;}
+.fish-line{position:absolute;top:2px;left:1px;width:1px;height:28px;background:#aaa;transform:rotate(-8deg);}
+
+/* Boat */
+.boat{position:absolute;bottom:16%;left:26%;}
+.boat-body{width:44px;height:14px;background:#c0443c;border-radius:3px 3px 8px 8px;border:1px solid #a03530;position:relative;}
+.boat-sail{width:0;height:0;border-left:13px solid transparent;border-right:0;border-bottom:28px solid rgba(255,255,255,.9);position:absolute;top:-28px;left:22px;}
+
+.scene-label{font-size:9px;color:#555;text-align:center;margin-top:3px;}
+
+/* ── Players ── */
+#players-layer{position:absolute;inset:0;pointer-events:none;}
+.player{position:absolute;display:flex;flex-direction:column;align-items:center;gap:1px;transform:translate(-50%,-100%);transition:left .15s ease,bottom .15s ease;pointer-events:none;}
+.player-activity{font-size:15px;line-height:1;margin-bottom:1px;}
+.player-bubble{font-size:11px;background:#fff;border:1px solid #ddd;padding:3px 8px;border-radius:12px;max-width:120px;text-align:center;word-break:break-word;margin-bottom:2px;color:#222;line-height:1.3;box-shadow:0 1px 4px rgba(0,0,0,.12);}
+.avatar-head{width:22px;height:22px;border-radius:50%;border:2px solid rgba(0,0,0,.15);}
+.avatar-body{width:22px;height:24px;border-radius:6px 6px 4px 4px;opacity:.8;margin-top:-1px;}
+.player-name{font-size:10px;font-weight:600;color:#111;background:rgba(255,255,255,.88);padding:1px 6px;border-radius:8px;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;}
+
+/* ── HUD ── */
+#hud{position:absolute;top:10px;left:10px;display:flex;gap:6px;z-index:5;pointer-events:none;}
+.hud-pill{font-size:11px;color:#fff;background:rgba(0,0,0,.45);padding:4px 10px;border-radius:20px;}
+#zone-label{position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:#fff;background:rgba(0,0,0,.6);padding:6px 16px;border-radius:20px;pointer-events:none;display:none;}
+
+/* ── Chat ── */
+#chat-panel{position:absolute;bottom:12px;right:12px;width:235px;display:flex;flex-direction:column;gap:5px;z-index:5;}
+#chat-messages{background:rgba(255,255,255,.93);border-radius:10px;border:1px solid #ddd;height:145px;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:3px;}
+.chat-msg{font-size:12px;line-height:1.4;color:#222;}
+.msg-sys{color:#888;font-style:italic;}
+#chat-input-row{display:flex;gap:5px;}
+#chat-input{flex:1;font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111;outline:none;}
+#chat-send{font-size:12px;padding:7px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#222;cursor:pointer;}
+#chat-send:hover{background:#f0f0f0;}
+
+/* ── Activity btn ── */
+#activity-btn{position:absolute;bottom:12px;left:10px;z-index:5;padding:8px 14px;border-radius:20px;border:1px solid #555;background:rgba(20,20,20,.85);color:#fff;font-size:13px;cursor:pointer;}
+#activity-btn:hover{background:rgba(60,60,60,.95);}
+#activity-menu{position:absolute;bottom:50px;left:10px;z-index:10;background:rgba(18,18,28,.97);border:1px solid #333;border-radius:12px;padding:10px;display:none;flex-direction:column;gap:5px;min-width:195px;}
+#activity-menu.open{display:flex;}
+.act-sec{font-size:9px;color:#556;padding:2px 5px;text-transform:uppercase;letter-spacing:.06em;}
+.act-btn{padding:7px 11px;border-radius:7px;border:1px solid #2a2a3a;background:transparent;color:#dde;font-size:12px;cursor:pointer;text-align:left;transition:background .1s;}
+.act-btn:hover{background:rgba(255,255,255,.08);}
+.act-btn.has-sub::after{content:" ›";color:#666;}
+.act-sub{display:none;flex-direction:column;gap:3px;padding-left:10px;border-left:1px solid #2a2a3a;margin-left:5px;}
+.act-sub.open{display:flex;}
+.act-clear{padding:5px 11px;border-radius:7px;border:1px solid #442;background:transparent;color:#e88;font-size:11px;cursor:pointer;text-align:left;margin-top:3px;}
+.act-clear:hover{background:rgba(255,80,80,.08);}
+
+/* ── Login ── */
+#login-panel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);z-index:30;}
+.login-card{background:#1a1a2e;border-radius:14px;padding:2rem;width:295px;display:flex;flex-direction:column;gap:13px;border:1px solid #2a2a4a;}
+.login-card h2{font-size:20px;font-weight:700;color:#fff;}
+.login-card p{font-size:12px;color:#778;line-height:1.5;}
+.login-card input{font-size:14px;padding:9px 12px;border-radius:8px;border:1px solid #2a2a4a;background:#0d0d1a;color:#fff;outline:none;}
+.login-card input:focus{border-color:#4a6aaa;}
+.color-row{display:flex;gap:7px;flex-wrap:wrap;}
+.cswatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .15s,transform .1s;}
+.cswatch:hover{transform:scale(1.1);}
+.cswatch.sel{border-color:#fff;}
+#join-btn{padding:11px;border-radius:8px;border:none;background:#4a6aee;color:#fff;cursor:pointer;font-size:14px;font-weight:600;transition:background .15s;}
+#join-btn:hover{background:#5a7aff;}
+#ws-note{font-size:10px;color:#445;text-align:center;}
+
+/* ── Modals ── */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.65);z-index:25;display:flex;align-items:center;justify-content:center;}
+.modal-box{background:#1a1a2e;border-radius:14px;border:1px solid #2a2a4a;padding:1.4rem;min-width:300px;}
+.modal-box h3{font-size:16px;font-weight:700;color:#fff;margin-bottom:12px;}
+.modal-close{float:right;background:transparent;border:none;color:#778;font-size:18px;cursor:pointer;line-height:1;}
+.modal-close:hover{color:#fff;}
+
+/* DJ modal */
+#dj-input{width:100%;font-size:13px;padding:8px 10px;border-radius:8px;border:1px solid #2a2a4a;background:#0d0d1a;color:#fff;outline:none;margin-bottom:8px;}
+#dj-submit{padding:8px 16px;border-radius:8px;border:none;background:#4a6aee;color:#fff;cursor:pointer;font-size:13px;}
+#dj-nowplaying{font-size:12px;color:#4ae;margin-top:8px;word-break:break-all;}
+
+/* Bar modal */
+.drink-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+.drink-btn{padding:10px 8px;border-radius:8px;border:1px solid #2a2a4a;background:#0d0d1a;color:#dde;font-size:13px;cursor:pointer;text-align:center;transition:background .1s;}
+.drink-btn:hover{background:#2a2a4a;}
+
+/* Chess/Checkers modal */
+#game-modal .modal-box{min-width:380px;}
+#game-tabs{display:flex;gap:6px;margin-bottom:12px;}
+.game-tab{padding:6px 14px;border-radius:8px;border:1px solid #2a2a4a;background:transparent;color:#778;font-size:12px;cursor:pointer;}
+.game-tab.active{background:#4a6aee;color:#fff;border-color:#4a6aee;}
+#chess-board,#checkers-board{display:grid;grid-template-columns:repeat(8,44px);grid-template-rows:repeat(8,44px);border:2px solid #4a4a6a;margin:0 auto;}
+.cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;user-select:none;position:relative;}
+.cell.light{background:#f0d9a0;}
+.cell.dark{background:#8a5a2a;}
+.cell.selected{outline:3px solid #4ae;outline-offset:-3px;}
+.cell.valid-move{background:#4ae !important;opacity:.5;}
+.checker{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:2px solid rgba(255,255,255,.3);}
+.checker.red{background:#e44;}
+.checker.black{background:#222;}
+.checker.king::after{content:"♔";font-size:12px;color:gold;}
+#game-status{font-size:12px;color:#aab;margin-top:8px;text-align:center;}
+#game-reset{margin-top:8px;padding:6px 14px;border-radius:8px;border:1px solid #2a2a4a;background:transparent;color:#aab;font-size:12px;cursor:pointer;}
+#game-reset:hover{background:#2a2a4a;}
+
+/* Fishing modal */
+#fish-modal .modal-box{min-width:320px;text-align:center;}
+#cast-btn{padding:10px 24px;border-radius:20px;border:none;background:#3388cc;color:#fff;font-size:14px;cursor:pointer;margin:10px auto;}
+#cast-btn:hover{background:#4499dd;}
+#fish-meter-wrap{height:18px;background:#0d0d1a;border-radius:9px;overflow:hidden;margin:8px 0;display:none;}
+#fish-meter{height:100%;width:0%;background:#4ae;transition:width .1s;border-radius:9px;}
+#fish-result{font-size:22px;margin:6px 0;}
+#fish-msg{font-size:13px;color:#aab;}
+
+/* Basement modal */
+#basement-modal .modal-box{min-width:340px;}
+.basement-scene{background:#0d0d1a;border-radius:10px;padding:16px;text-align:center;margin-bottom:10px;}
+.basement-scene p{font-size:13px;color:#9ab;line-height:1.6;}
+
+/* Responsive */
+@media(max-width:700px){#sidebar{display:none;}#wrapper{flex-direction:column;}}
+</style>
 </head>
 <body>
-<div id="app">
-  <div id="game-canvas">
-    <!-- Scene -->
-    <div class="sky">
-      <div class="sun"></div>
-      <div class="cloud" style="top:18px;left:90px;width:65px;height:20px;"></div>
-      <div class="cloud" style="top:12px;left:150px;width:38px;height:13px;"></div>
-      <div class="cloud" style="top:32px;left:230px;width:85px;height:22px;"></div>
-      <div class="cloud" style="top:20px;left:400px;width:55px;height:16px;"></div>
-      <div class="cloud" style="top:38px;left:550px;width:70px;height:19px;"></div>
-      <div class="cloud" style="top:14px;left:700px;width:45px;height:14px;"></div>
+<div id="wrapper">
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <div id="sb-header">
+    <h2>🏡 Lake House</h2>
+    <p id="sb-count">0 online</p>
+  </div>
+  <div id="online-list">
+    <div class="sb-section">Online</div>
+  </div>
+  <div id="sb-footer">mudpanther.github.io/lakehouse-</div>
+</div>
+
+<!-- Main game -->
+<div id="main">
+<div id="game-canvas">
+
+  <!-- Scene -->
+  <div class="sky">
+    <div class="sun"></div>
+    <div class="cloud" style="top:16px;left:80px;width:70px;height:21px;"></div>
+    <div class="cloud" style="top:10px;left:155px;width:40px;height:14px;"></div>
+    <div class="cloud" style="top:30px;left:240px;width:90px;height:24px;"></div>
+    <div class="cloud" style="top:18px;left:420px;width:60px;height:17px;"></div>
+    <div class="cloud" style="top:35px;left:580px;width:75px;height:20px;"></div>
+    <div class="cloud" style="top:12px;left:760px;width:48px;height:15px;"></div>
+  </div>
+  <div id="trees-row" style="position:absolute;bottom:54%;left:0;right:0;height:140px;display:flex;align-items:flex-end;overflow:hidden;pointer-events:none;"></div>
+  <div class="ground"></div>
+  <div class="lake"></div>
+  <div class="lake-shine"></div>
+  <div class="dock-post" style="left:46%;"></div>
+  <div class="dock-post" style="left:52%;"></div>
+  <div class="dock"></div>
+  <div class="boat"><div class="boat-body"><div class="boat-sail"></div></div></div>
+
+  <!-- House -->
+  <div class="house">
+    <div class="house-body">
+      <div class="house-roof"></div>
+      <div class="house-door"></div>
+      <div class="house-win" style="left:8px;"></div>
+      <div class="house-win" style="right:8px;"></div>
     </div>
-    <div id="trees-row" style="position:absolute;bottom:54%;left:0;right:0;height:130px;display:flex;align-items:flex-end;overflow:hidden;"></div>
-    <div class="ground"></div>
-    <div class="lake"></div>
-    <div class="lake-shine"></div>
-    <div class="dock-post" style="left:46%;"></div>
-    <div class="dock-post" style="left:52%;"></div>
-    <div class="dock"></div>
-    <!-- Boat -->
-    <div class="boat"><div class="boat-body"><div class="boat-sail"></div></div></div>
-    <!-- House -->
-    <div class="house">
-      <div class="house-body">
-        <div class="house-roof"></div>
-        <div class="house-door"></div>
-        <div class="house-window"></div>
-        <div class="house-window2"></div>
-      </div>
-      <div class="scene-label">lake house</div>
+    <div class="scene-label">lake house</div>
+  </div>
+  <!-- Secret basement door -->
+  <div class="basement-door" id="basement-trigger" title="..."></div>
+  <div class="basement-label">▼</div>
+
+  <!-- DJ Booth -->
+  <div class="dj-booth">
+    <div class="dj-table" id="dj-trigger" style="cursor:pointer;" title="DJ Booth">
+      <div class="dj-disc" style="border:3px solid #e44;animation:spin 2s linear infinite;"></div>
+      <div class="dj-disc" style="border:3px solid #4ae;animation:spin 3s linear infinite reverse;"></div>
     </div>
-    <!-- DJ Booth -->
-    <div class="dj-booth">
-      <div class="dj-table"><div class="dj-disc"></div><div class="dj-disc2"></div></div>
-      <div class="scene-label">dj booth</div>
+    <div class="scene-label">dj booth</div>
+  </div>
+  <div class="now-playing" id="now-playing"></div>
+
+  <!-- Bar -->
+  <div class="bar">
+    <div class="bar-counter" id="bar-trigger" style="cursor:pointer;" title="Bar">
+      <div class="bar-bottle"></div>
+      <div class="bar-bottle2"></div>
+      <div class="bar-bottle3"></div>
+      <div class="bar-bottle" style="background:#7a3a7a;"></div>
     </div>
-    <!-- Campfire -->
-    <div class="campfire">
-      <div class="fire-inner"></div>
-      <div class="fire"></div>
-      <div class="fire-base"></div>
-      <div class="scene-label">fire pit</div>
+    <div class="scene-label">bar</div>
+  </div>
+
+  <!-- Game Table -->
+  <div class="game-table">
+    <div class="game-board" id="game-trigger" title="Chess / Checkers">
+      <div class="gb-light"></div><div class="gb-dark"></div><div class="gb-light"></div><div class="gb-dark"></div>
+      <div class="gb-dark"></div><div class="gb-light"></div><div class="gb-dark"></div><div class="gb-light"></div>
+      <div class="gb-light"></div><div class="gb-dark"></div><div class="gb-light"></div><div class="gb-dark"></div>
+      <div class="gb-dark"></div><div class="gb-light"></div><div class="gb-dark"></div><div class="gb-light"></div>
     </div>
-    <!-- Fishing -->
-    <div class="fish-area">
-      <div class="fish-rod"><div class="fish-line"></div></div>
-      <div class="scene-label">fishing</div>
+    <div class="scene-label">games</div>
+  </div>
+
+  <!-- Campfire -->
+  <div class="campfire">
+    <div class="fire-in"></div>
+    <div class="fire"></div>
+    <div class="fire-base"></div>
+    <div class="scene-label">fire pit</div>
+  </div>
+
+  <!-- Fishing -->
+  <div class="fish-area" id="fish-trigger" style="cursor:pointer;" title="Fishing">
+    <div class="fish-rod"><div class="fish-line"></div></div>
+    <div class="scene-label">fishing</div>
+  </div>
+
+  <!-- Players -->
+  <div id="players-layer"></div>
+  <div id="zone-label"></div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-pill" id="player-count">0 online</div>
+    <div class="hud-pill" id="status-dot">connecting...</div>
+  </div>
+
+  <!-- Chat -->
+  <div id="chat-panel">
+    <div id="chat-messages"></div>
+    <div id="chat-input-row">
+      <input id="chat-input" type="text" placeholder="say something..." maxlength="100"/>
+      <button id="chat-send">send</button>
     </div>
+  </div>
 
-    <!-- Players -->
-    <div id="players-layer"></div>
-    <div id="zone-label"></div>
-
-    <!-- HUD -->
-    <div id="hud">
-      <div id="player-count">1 online</div>
-      <div id="status-dot">connecting...</div>
+  <!-- Activity Button -->
+  <button id="activity-btn">🎯 activity</button>
+  <div id="activity-menu">
+    <div class="act-sec">what are you doing?</div>
+    <button class="act-btn has-sub" data-sub="smoke-sub">🌿 smoke</button>
+    <div class="act-sub" id="smoke-sub">
+      <button class="act-btn" data-activity="smoking a rig 🔥">🔥 rig</button>
+      <button class="act-btn" data-activity="hitting the bong 💨">💨 bong</button>
+      <button class="act-btn" data-activity="smoking a joint 🚬">🚬 joint</button>
+      <button class="act-btn" data-activity="rolling a blunt 🍃">🍃 blunt</button>
+      <button class="act-btn" data-activity="hash party 🫧">🫧 hash party</button>
     </div>
-
-    <!-- Chat -->
-    <div id="chat-panel">
-      <div id="chat-messages"></div>
-      <div id="chat-input-row">
-        <input id="chat-input" type="text" placeholder="say something..." maxlength="100" />
-        <button id="chat-send">send</button>
-      </div>
+    <button class="act-btn has-sub" data-sub="fish-sub">🎣 fish</button>
+    <div class="act-sub" id="fish-sub">
+      <button class="act-btn" data-activity="lake fishing 🎣">🎣 lake fish</button>
+      <button class="act-btn" data-activity="deep sea fishing 🌊">🌊 ocean</button>
+      <button class="act-btn" data-activity="fly fishing 🪰">🪰 fly fishing</button>
+      <button class="act-btn" data-activity="cat calling 😼">😼 cat calling</button>
     </div>
+    <button class="act-btn" data-activity="spinning records 🎧">🎧 djing</button>
+    <button class="act-btn" data-activity="vibing by the fire 🔥">🔥 campfire</button>
+    <button class="act-btn" data-activity="chilling inside 🏡">🏡 inside</button>
+    <button class="act-btn" data-activity="out on the boat ⛵">⛵ boat ride</button>
+    <button class="act-clear" id="clear-activity">✕ clear activity</button>
+  </div>
 
-    <!-- Activity Button & Menu -->
-    <button id="activity-btn">🎯 activity</button>
-    <div id="activity-menu">
-      <div class="act-section">what are you doing?</div>
-
-      <button class="act-btn has-sub" data-sub="smoke-sub">🌿 smoke</button>
-      <div class="act-sub" id="smoke-sub">
-        <button class="act-btn" data-activity="smoking a rig 🔥">🔥 rig</button>
-        <button class="act-btn" data-activity="hitting the bong 💨">💨 bong</button>
-        <button class="act-btn" data-activity="smoking a joint 🚬">🚬 joint</button>
-        <button class="act-btn" data-activity="rolling a blunt 🍃">🍃 blunt</button>
-        <button class="act-btn" data-activity="hash party 🫧">🫧 hash party</button>
-      </div>
-
-      <button class="act-btn has-sub" data-sub="fish-sub">🎣 fish</button>
-      <div class="act-sub" id="fish-sub">
-        <button class="act-btn" data-activity="lake fishing 🎣">🎣 lake fish</button>
-        <button class="act-btn" data-activity="deep sea fishing 🌊">🌊 ocean</button>
-        <button class="act-btn" data-activity="fly fishing 🪰">🪰 fly fishing</button>
-        <button class="act-btn" data-activity="cat calling 😼">😼 cat calling</button>
-      </div>
-
-      <button class="act-btn" data-activity="chilling at the DJ booth 🎧">🎧 dj</button>
-      <button class="act-btn" data-activity="vibing by the fire 🔥">🔥 campfire</button>
-      <button class="act-btn" data-activity="relaxing inside 🏡">🏡 inside</button>
-      <button class="act-btn" data-activity="out on the boat ⛵">⛵ boat ride</button>
-
-      <button class="act-clear" id="clear-activity">✕ clear activity</button>
+  <!-- Login -->
+  <div id="login-panel">
+    <div class="login-card">
+      <h2>🏡 Lake House</h2>
+      <p>Pick a name and color. Anyone with the link is in the same room.</p>
+      <input id="name-input" type="text" placeholder="your name" maxlength="16"/>
+      <div class="color-row" id="color-picker"></div>
+      <button id="join-btn">join the hangout</button>
+      <div id="ws-note">connecting...</div>
     </div>
+  </div>
 
-    <!-- Login -->
-    <div id="login-panel">
-      <div class="login-card">
-        <h2>🏡 Lake House</h2>
-        <p>Pick your name and color, then hop in. Anyone with this link is in the same room.</p>
-        <input id="name-input" type="text" placeholder="your name" maxlength="16" />
-        <div class="color-row" id="color-picker"></div>
-        <button id="join-btn">join the hangout</button>
-        <div id="ws-url-note">connecting to server...</div>
+  <!-- DJ Modal -->
+  <div class="modal-overlay" id="dj-modal" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" data-close="dj-modal">✕</button>
+      <h3>🎧 DJ Booth</h3>
+      <input id="dj-input" type="text" placeholder="paste a YouTube URL or song name..."/>
+      <button id="dj-submit">▶ Play for everyone</button>
+      <div id="dj-nowplaying"></div>
+    </div>
+  </div>
+
+  <!-- Bar Modal -->
+  <div class="modal-overlay" id="bar-modal" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" data-close="bar-modal">✕</button>
+      <h3>🍺 Bar</h3>
+      <p style="font-size:12px;color:#778;margin-bottom:8px;">What are you drinking?</p>
+      <div class="drink-grid">
+        <button class="drink-btn" data-drink="sipping a beer 🍺">🍺 Beer</button>
+        <button class="drink-btn" data-drink="drinking wine 🍷">🍷 Wine</button>
+        <button class="drink-btn" data-drink="on the whiskey 🥃">🥃 Whiskey</button>
+        <button class="drink-btn" data-drink="drinking tequila 🥂">🥂 Tequila</button>
+        <button class="drink-btn" data-drink="sipping a cocktail 🍹">🍹 Cocktail</button>
+        <button class="drink-btn" data-drink="drinking vodka 🧊">🧊 Vodka</button>
+        <button class="drink-btn" data-drink="on the rum 🍸">🍸 Rum</button>
+        <button class="drink-btn" data-drink="keeping it water 💧">💧 Water</button>
       </div>
     </div>
   </div>
-</div>
+
+  <!-- Game Modal -->
+  <div class="modal-overlay" id="game-modal" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" data-close="game-modal">✕</button>
+      <h3>♟️ Game Table</h3>
+      <div id="game-tabs">
+        <button class="game-tab active" data-game="chess">Chess</button>
+        <button class="game-tab" data-game="checkers">Checkers</button>
+      </div>
+      <div id="chess-board"></div>
+      <div id="checkers-board" style="display:none;"></div>
+      <div id="game-status">White's turn</div>
+      <button id="game-reset">↺ Reset</button>
+    </div>
+  </div>
+
+  <!-- Fishing Modal -->
+  <div class="modal-overlay" id="fish-modal" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" data-close="fish-modal">✕</button>
+      <h3>🎣 Fishing Hole</h3>
+      <p style="font-size:12px;color:#778;margin-bottom:6px;">Cast your line and wait for a bite...</p>
+      <button id="cast-btn">🎣 Cast Line</button>
+      <div id="fish-meter-wrap"><div id="fish-meter"></div></div>
+      <div id="fish-result"></div>
+      <div id="fish-msg">Ready to fish.</div>
+    </div>
+  </div>
+
+  <!-- Basement Modal -->
+  <div class="modal-overlay" id="basement-modal" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" data-close="basement-modal">✕</button>
+      <h3>🚪 Secret Basement</h3>
+      <div class="basement-scene">
+        <p>🕯️ You found the hidden room.<br><br>
+        Dimly lit. Old couch. A lava lamp in the corner.<br>
+        Someone left a half-smoked blunt on the table.<br><br>
+        <em>The vibe is immaculate.</em></p>
+      </div>
+      <p style="font-size:11px;color:#445;text-align:center;">Keep this between us 🤫</p>
+    </div>
+  </div>
+
+</div><!-- end game-canvas -->
+</div><!-- end main -->
+</div><!-- end wrapper -->
+
+<style>
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+</style>
 
 <script>
-// ─── CONFIG ──────────────────────────────────────────────────────────────────
-// After deploying to Railway, paste your Railway URL here:
-// e.g. "wss://lakehouse-production-abc1.up.railway.app/ws"
-// Railway gives you a URL under: Settings → Networking → Public Domain
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
 const WS_URL = "wss://lakehouse-production-ab5f.up.railway.app/ws";
 // ─────────────────────────────────────────────────────────────────────────────
 
-const COLORS = ['#e05c5c','#e07c3a','#e0c040','#4db86e','#3a9ad9','#9b59e0','#e05cb0','#5cd4d4','#ff8c42','#a8e6cf'];
+const COLORS = ['#e05c5c','#e07c3a','#e0c040','#4db86e','#3a9ad9','#9b59e0','#e05cb0','#5cd4d4','#ff8c42','#a8e6cf','#f06292','#80cbc4'];
 
 const ZONES = {
-  house:    { label: 'chilling inside the lake house', x:[78,96], y:[38,62] },
-  dj:       { label: 'at the dj booth',                x:[4,18],  y:[38,62] },
-  dock:     { label: 'on the dock',                    x:[43,58], y:[24,36] },
-  lake:     { label: 'out on the lake',                x:[12,80], y:[8,28]  },
-  campfire: { label: 'around the fire pit',            x:[24,38], y:[46,62] },
-  fishing:  { label: 'fishing off the dock',           x:[80,94], y:[24,36] },
+  house:    {label:'chilling inside the lake house', x:[74,96], y:[38,65]},
+  dj:       {label:'at the dj booth',                x:[3,17],  y:[38,65]},
+  bar:      {label:'at the bar',                     x:[20,35], y:[38,65]},
+  games:    {label:'at the game table',              x:[38,54], y:[38,65]},
+  campfire: {label:'around the fire pit',            x:[58,72], y:[42,65]},
+  dock:     {label:'on the dock',                    x:[43,58], y:[24,37]},
+  lake:     {label:'out on the lake',                x:[10,82], y:[6,26]},
+  fishing:  {label:'fishing',                        x:[80,96], y:[24,40]},
 };
 
-let me = null;
-let players = {};
-let ws = null;
-let myBubbleTimer = null;
-
+let me = null, players = {}, ws = null, myBubbleTimer = null;
 const $ = id => document.getElementById(id);
 
-// ── Build trees ───────────────────────────────────────────────────────────────
-const treesRow = $('trees-row');
-for (let i = 0; i < 36; i++) {
-  const h = 45 + Math.random() * 65;
-  const w = 20 + Math.random() * 16;
-  const g = document.createElement('div');
-  g.style.cssText = `display:inline-flex;flex-direction:column;align-items:center;margin-right:${-6 + Math.random()*4}px;flex-shrink:0;`;
-  g.innerHTML = `<div style="width:0;height:0;border-left:${w/2}px solid transparent;border-right:${w/2}px solid transparent;border-bottom:${h*0.62}px solid ${Math.random()>0.5?'#2e7d32':'#1b5e20'};"></div><div style="width:${w*0.22}px;height:${h*0.32}px;background:#5d4037;border-radius:1px;"></div>`;
-  treesRow.appendChild(g);
+document.addEventListener("DOMContentLoaded",()=>{
+// ── Trees ─────────────────────────────────────────────────────────────────────
+const tr = $('trees-row');
+for(let i=0;i<38;i++){
+  const h=44+Math.random()*68, w=18+Math.random()*16;
+  const g=document.createElement('div');
+  g.style.cssText=`display:inline-flex;flex-direction:column;align-items:center;margin-right:${-5+Math.random()*3}px;flex-shrink:0;`;
+  g.innerHTML=`<div style="width:0;height:0;border-left:${w/2}px solid transparent;border-right:${w/2}px solid transparent;border-bottom:${h*.62}px solid ${Math.random()>.5?'#2e7d32':'#1b5e20'};"></div><div style="width:${w*.22}px;height:${h*.32}px;background:#5d4037;border-radius:1px;"></div>`;
+  tr.appendChild(g);
 }
 
 // ── Color picker ──────────────────────────────────────────────────────────────
-let chosenColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-const cp = $('color-picker');
-COLORS.forEach(c => {
-  const sw = document.createElement('div');
-  sw.className = 'color-swatch' + (c === chosenColor ? ' selected' : '');
-  sw.style.background = c;
-  sw.onclick = () => {
-    chosenColor = c;
-    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-    sw.classList.add('selected');
-  };
-  cp.appendChild(sw);
+let chosenColor = COLORS[Math.floor(Math.random()*COLORS.length)];
+COLORS.forEach(c=>{
+  const sw=document.createElement('div');
+  sw.className='cswatch'+(c===chosenColor?' sel':'');
+  sw.style.background=c;
+  sw.onclick=()=>{chosenColor=c;document.querySelectorAll('.cswatch').forEach(s=>s.classList.remove('sel'));sw.classList.add('sel');};
+  $('color-picker').appendChild(sw);
 });
 
 // ── WebSocket ─────────────────────────────────────────────────────────────────
-function connectWS() {
-  if (WS_URL.includes("YOUR_RAILWAY")) {
-    $('status-dot').textContent = '⚠ set WS_URL';
-    $('ws-url-note').textContent = '⚠ paste your Railway URL in index.html';
-    useBroadcastFallback();
-    return;
-  }
-  try {
-    ws = new WebSocket(WS_URL);
-    ws.onopen = () => {
-      $('status-dot').textContent = '● online';
-      $('status-dot').style.background = 'rgba(50,180,80,0.5)';
-      $('ws-url-note').textContent = 'connected!';
-      if (me) ws.send(JSON.stringify({ type: 'join', player: { ...me } }));
+let bc=null;
+try{bc=new BroadcastChannel('lakehouse-v3');}catch(_){}
+
+function connectWS(){
+  try{
+    ws=new WebSocket(WS_URL);
+    ws.onopen=()=>{
+      $('status-dot').textContent='● online';
+      $('ws-note').textContent='connected!';
+      if(me) ws.send(JSON.stringify({type:'join',player:{...me}}));
     };
-    ws.onmessage = (e) => handleMsg(JSON.parse(e.data));
-    ws.onclose = () => {
-      $('status-dot').textContent = '○ reconnecting...';
-      setTimeout(connectWS, 3000);
-    };
-    ws.onerror = () => ws.close();
-  } catch(err) {
-    console.error(err);
-  }
+    ws.onmessage=e=>handleMsg(JSON.parse(e.data));
+    ws.onclose=()=>{$('status-dot').textContent='○ reconnecting...';setTimeout(connectWS,3000);};
+    ws.onerror=()=>ws.close();
+  }catch(e){console.error(e);}
 }
 
-function send(msg) {
-  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
-  // Also broadcast locally (same browser tabs)
-  try { bc && bc.postMessage(msg); } catch(_) {}
+function send(msg){
+  if(ws&&ws.readyState===1) ws.send(JSON.stringify(msg));
+  try{bc&&bc.postMessage(msg);}catch(_){}
 }
 
-// ── BroadcastChannel fallback (same device, multiple tabs) ────────────────────
-let bc = null;
-try { bc = new BroadcastChannel('lakehouse-v2'); } catch(_) {}
-function useBroadcastFallback() {
-  $('status-dot').textContent = '● local mode';
-  if (bc) bc.onmessage = (e) => handleMsg(e.data);
-}
-if (bc && WS_URL.includes("YOUR_RAILWAY")) {
-  bc.onmessage = (e) => handleMsg(e.data);
-}
+if(bc) bc.onmessage=e=>handleMsg(e.data);
 
 // ── Message handler ───────────────────────────────────────────────────────────
-function handleMsg(msg) {
-  if (msg.type === 'join' || msg.type === 'move') {
-    const isNew = !players[msg.player.id];
-    players[msg.player.id] = { ...players[msg.player.id], ...msg.player };
-    if (msg.type === 'join' && isNew && msg.player.id !== me?.id) {
-      addChatMsg(null, `${msg.player.name} joined the lake house`, true);
+function handleMsg(msg){
+  if(msg.type==='join'||msg.type==='move'){
+    const isNew=!players[msg.player.id];
+    players[msg.player.id]={...players[msg.player.id],...msg.player};
+    if(msg.type==='join'&&isNew&&msg.player.id!==me?.id)
+      addChat(null,`${msg.player.name} joined the lake house`,true);
+    renderPlayers(); updateSidebar();
+  } else if(msg.type==='leave'){
+    const p=players[msg.id];
+    if(p&&msg.id!==me?.id){addChat(null,`${p.name} left`,true);delete players[msg.id];renderPlayers();updateSidebar();}
+  } else if(msg.type==='chat'){
+    const p=players[msg.id];
+    if(p){
+      addChat(msg.id,msg.text);
+      players[msg.id].bubble=msg.text; renderPlayers();
+      if(players[msg.id]._bt) clearTimeout(players[msg.id]._bt);
+      players[msg.id]._bt=setTimeout(()=>{if(players[msg.id]){players[msg.id].bubble=null;renderPlayers();}},6000);
     }
-    renderPlayers();
-  } else if (msg.type === 'activity') {
-    if (players[msg.id]) {
-      players[msg.id].activity = msg.activity;
-      renderPlayers();
-      if (msg.activity && msg.id !== me?.id) {
-        addChatMsg(null, `${players[msg.id].name} is ${msg.activity}`, true);
-      }
+  } else if(msg.type==='activity'){
+    if(players[msg.id]){
+      players[msg.id].activity=msg.activity; renderPlayers(); updateSidebar();
+      if(msg.activity&&msg.id!==me?.id) addChat(null,`${players[msg.id].name} is ${msg.activity}`,true);
     }
-  } else if (msg.type === 'leave') {
-    const p = players[msg.id];
-    if (p && msg.id !== me?.id) {
-      addChatMsg(null, `${p.name} left`, true);
-      delete players[msg.id];
-      renderPlayers();
-    }
-  } else if (msg.type === 'chat') {
-    const p = players[msg.id];
-    if (p) {
-      addChatMsg(msg.id, msg.text);
-      players[msg.id].bubble = msg.text;
-      renderPlayers();
-      if (players[msg.id]._bubbleTimer) clearTimeout(players[msg.id]._bubbleTimer);
-      players[msg.id]._bubbleTimer = setTimeout(() => {
-        if (players[msg.id]) { players[msg.id].bubble = null; renderPlayers(); }
-      }, 6000);
-    }
+  } else if(msg.type==='dj'){
+    $('now-playing').style.display='block';
+    $('now-playing').textContent='🎵 '+msg.text;
+    $('dj-nowplaying').textContent='Now playing: '+msg.text;
+    if(msg.id!==me?.id) addChat(null,`${players[msg.id]?.name||'someone'} is playing: ${msg.text}`,true);
   }
 }
 
 // ── Render players ────────────────────────────────────────────────────────────
-function renderPlayers() {
-  const layer = $('players-layer');
-  const existing = {};
-  layer.querySelectorAll('.player').forEach(el => existing[el.dataset.pid] = el);
-  const seen = new Set();
-  Object.values(players).forEach(p => {
+function renderPlayers(){
+  const layer=$('players-layer');
+  const existing={};
+  layer.querySelectorAll('.player').forEach(el=>existing[el.dataset.pid]=el);
+  const seen=new Set();
+  Object.values(players).forEach(p=>{
     seen.add(p.id);
-    let el = existing[p.id];
-    if (!el) {
-      el = document.createElement('div');
-      el.className = 'player';
-      el.dataset.pid = p.id;
-      el.innerHTML = `
-        <div class="player-activity" data-activity style="display:none;"></div>
-        <div class="player-bubble" data-bubble style="display:none;"></div>
-        <div class="avatar-head" data-head style="background:${p.color};"></div>
-        <div class="avatar-body" data-body style="background:${p.color};"></div>
-        <div class="player-name" data-name>${escHtml(p.name)}</div>`;
+    let el=existing[p.id];
+    if(!el){
+      el=document.createElement('div'); el.className='player'; el.dataset.pid=p.id;
+      el.innerHTML=`<div class="player-activity" data-act style="display:none;"></div><div class="player-bubble" data-bubble style="display:none;"></div><div class="avatar-head" data-head style="background:${p.color};"></div><div class="avatar-body" data-body style="background:${p.color};"></div><div class="player-name" data-name>${esc(p.name)}</div>`;
       layer.appendChild(el);
     }
-    el.style.left = p.x + '%';
-    el.style.bottom = p.y + '%';
-    el.querySelector('[data-head]').style.background = p.color;
-    el.querySelector('[data-body]').style.background = p.color;
-    el.querySelector('[data-name]').textContent = p.name;
-    const bubble = el.querySelector('[data-bubble]');
-    if (p.bubble) { bubble.textContent = p.bubble; bubble.style.display = 'block'; }
-    else bubble.style.display = 'none';
-    const actEl = el.querySelector('[data-activity]');
-    if (actEl) {
-      if (p.activity) { actEl.textContent = p.activity.split(' ').pop(); actEl.style.display = 'block'; actEl.title = p.activity; }
-      else actEl.style.display = 'none';
-    }
+    el.style.left=p.x+'%'; el.style.bottom=p.y+'%';
+    el.querySelector('[data-head]').style.background=p.color;
+    el.querySelector('[data-body]').style.background=p.color;
+    el.querySelector('[data-name]').textContent=p.name;
+    const bub=el.querySelector('[data-bubble]');
+    if(p.bubble){bub.textContent=p.bubble;bub.style.display='block';}else bub.style.display='none';
+    const act=el.querySelector('[data-act]');
+    if(p.activity){act.textContent=p.activity.split(' ').pop();act.style.display='block';act.title=p.activity;}else act.style.display='none';
   });
-  Object.keys(existing).forEach(pid => { if (!seen.has(pid)) existing[pid].remove(); });
-  $('player-count').textContent = Object.keys(players).length + ' online';
+  Object.keys(existing).forEach(pid=>{if(!seen.has(pid))existing[pid].remove();});
+  const cnt=Object.keys(players).length;
+  $('player-count').textContent=cnt+' online';
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────────
+function updateSidebar(){
+  const list=$('online-list');
+  list.innerHTML='<div class="sb-section">Online — '+Object.keys(players).length+'</div>';
+  Object.values(players).forEach(p=>{
+    const zone=getZone(p.x||50,p.y||50);
+    const div=document.createElement('div'); div.className='sb-player';
+    div.innerHTML=`<div class="sb-dot" style="background:${p.color};"></div><div class="sb-info"><div class="sb-name">${esc(p.name)}${p.id===me?.id?' (you)':''}</div><div class="sb-status">${zone||'wandering'}</div></div><div class="sb-act">${p.activity?p.activity.split(' ').pop():''}</div>`;
+    list.appendChild(div);
+  });
+  $('sb-count').textContent=Object.keys(players).length+' online';
 }
 
 // ── Zone detection ────────────────────────────────────────────────────────────
-function getZone(x, y) {
-  for (const [, z] of Object.entries(ZONES)) {
-    if (x >= z.x[0] && x <= z.x[1] && y >= z.y[0] && y <= z.y[1]) return z.label;
-  }
+function getZone(x,y){
+  for(const [,z] of Object.entries(ZONES))
+    if(x>=z.x[0]&&x<=z.x[1]&&y>=z.y[0]&&y<=z.y[1]) return z.label;
   return null;
 }
 
 // ── Click to move ─────────────────────────────────────────────────────────────
-$('game-canvas').addEventListener('click', e => {
-  if (!me) return;
-  const rect = e.currentTarget.getBoundingClientRect();
-  const x = Math.max(2, Math.min(97, ((e.clientX - rect.left) / rect.width) * 100));
-  const y = Math.max(8, Math.min(66, (1 - (e.clientY - rect.top) / rect.height) * 100));
-  me.x = x; me.y = y;
-  players[me.id] = { ...me };
-  send({ type: 'move', player: { id: me.id, name: me.name, color: me.color, x: me.x, y: me.y, activity: me.activity || null } });
-  renderPlayers();
-  const zone = getZone(x, y);
-  if (zone) {
-    const zl = $('zone-label');
-    zl.textContent = zone;
-    zl.style.display = 'block';
-    clearTimeout(zl._t);
-    zl._t = setTimeout(() => zl.style.display = 'none', 2500);
-  }
+$('game-canvas').addEventListener('click',e=>{
+  if(!me) return;
+  if(e.target.closest('.modal-overlay,.modal-box,#activity-menu,#activity-btn,#chat-panel,#hud,#dj-trigger,#bar-trigger,#game-trigger,#fish-trigger,#fish-area,#basement-trigger')) return;
+  const rect=e.currentTarget.getBoundingClientRect();
+  const x=Math.max(2,Math.min(97,((e.clientX-rect.left)/rect.width)*100));
+  const y=Math.max(7,Math.min(67,(1-(e.clientY-rect.top)/rect.height)*100));
+  me.x=x; me.y=y; players[me.id]={...me};
+  send({type:'move',player:{id:me.id,name:me.name,color:me.color,x,y,activity:me.activity||null}});
+  renderPlayers(); updateSidebar();
+  const zone=getZone(x,y);
+  if(zone){const zl=$('zone-label');zl.textContent=zone;zl.style.display='block';clearTimeout(zl._t);zl._t=setTimeout(()=>zl.style.display='none',2500);}
 });
 
 // ── Chat ──────────────────────────────────────────────────────────────────────
-function sendChat() {
-  const inp = $('chat-input');
-  const txt = inp.value.trim();
-  if (!txt || !me) return;
-  inp.value = '';
-  me.bubble = txt;
-  players[me.id] = { ...me };
-  addChatMsg(me.id, txt);
-  send({ type: 'chat', id: me.id, text: txt });
+function sendChat(){
+  const inp=$('chat-input'), txt=inp.value.trim();
+  if(!txt||!me) return; inp.value='';
+  me.bubble=txt; players[me.id]={...me};
+  addChat(me.id,txt); send({type:'chat',id:me.id,text:txt});
   renderPlayers();
-  if (myBubbleTimer) clearTimeout(myBubbleTimer);
-  myBubbleTimer = setTimeout(() => {
-    if (me) { me.bubble = null; players[me.id] = { ...me }; renderPlayers(); }
-  }, 6000);
+  if(myBubbleTimer) clearTimeout(myBubbleTimer);
+  myBubbleTimer=setTimeout(()=>{if(me){me.bubble=null;players[me.id]={...me};renderPlayers();}},6000);
 }
-$('chat-send').onclick = sendChat;
-$('chat-input').onkeydown = e => { if (e.key === 'Enter') sendChat(); };
+$('chat-send').onclick=sendChat;
+$('chat-input').onkeydown=e=>{if(e.key==='Enter')sendChat();};
 
-function addChatMsg(name, text, isSystem = false) {
-  const box = $('chat-messages');
-  const div = document.createElement('div');
-  div.className = 'chat-msg';
-  if (isSystem) {
-    div.innerHTML = `<span class="msg-system">${escHtml(text)}</span>`;
-  } else {
-    const color = players[name]?.color || '#888';
-    div.innerHTML = `<span style="font-weight:600;color:${color};">${escHtml(players[name]?.name || name)}</span> ${escHtml(text)}`;
-  }
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-  if (box.children.length > 100) box.removeChild(box.children[0]);
+function addChat(id,text,sys=false){
+  const box=$('chat-messages'), div=document.createElement('div');
+  div.className='chat-msg';
+  if(sys) div.innerHTML=`<span class="msg-sys">${esc(text)}</span>`;
+  else div.innerHTML=`<span style="font-weight:600;color:${players[id]?.color||'#888'};">${esc(players[id]?.name||id)}</span> ${esc(text)}`;
+  box.appendChild(div); box.scrollTop=box.scrollHeight;
+  if(box.children.length>120) box.removeChild(box.children[0]);
 }
 
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ── Join ──────────────────────────────────────────────────────────────────────
-$('join-btn').onclick = () => {
-  const name = $('name-input').value.trim() || 'anon';
-  me = {
-    id: name + '_' + Math.random().toString(36).slice(2, 7),
-    name,
-    color: chosenColor,
-    x: 25 + Math.random() * 50,
-    y: 32 + Math.random() * 18,
-    bubble: null
-  };
-  players[me.id] = { ...me };
-  $('login-panel').style.display = 'none';
-  connectWS();
-  send({ type: 'join', player: { ...me } });
-  addChatMsg(null, `you joined as ${name} — click anywhere to move!`, true);
-  renderPlayers();
-  // Heartbeat
-  setInterval(() => { if (me) send({ type: 'join', player: { ...me } }); }, 10000);
-  window.addEventListener('beforeunload', () => { if (me) send({ type: 'leave', id: me.id }); });
-};
-$('name-input').onkeydown = e => { if (e.key === 'Enter') $('join-btn').click(); };
-
-// Init WS URL note
-$('ws-url-note').textContent = WS_URL.includes('YOUR_RAILWAY')
-  ? '⚠ paste your Railway URL in WS_URL'
-  : 'connecting...';
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // ── Activity Menu ─────────────────────────────────────────────────────────────
-const actBtn = $('activity-btn');
-const actMenu = $('activity-menu');
-
-// Toggle menu open/close
-actBtn.onclick = (e) => {
-  e.stopPropagation();
-  actMenu.classList.toggle('open');
+$('activity-btn').onclick=e=>{e.stopPropagation();$('activity-menu').classList.toggle('open');};
+document.addEventListener('click',()=>$('activity-menu').classList.remove('open'));
+$('activity-menu').addEventListener('click',e=>e.stopPropagation());
+document.querySelectorAll('.act-btn.has-sub').forEach(btn=>{
+  btn.onclick=e=>{e.stopPropagation();const sub=$(btn.dataset.sub),was=sub.classList.contains('open');document.querySelectorAll('.act-sub').forEach(s=>s.classList.remove('open'));if(!was)sub.classList.add('open');};
+});
+document.querySelectorAll('.act-btn[data-activity]').forEach(btn=>{
+  btn.onclick=e=>{e.stopPropagation();if(!me)return;
+    me.activity=btn.dataset.activity; players[me.id]={...me};
+    send({type:'activity',id:me.id,activity:me.activity});
+    addChat(null,`${me.name} is ${me.activity}`,true);
+    renderPlayers(); updateSidebar();
+    $('activity-menu').classList.remove('open');
+    $('activity-btn').textContent=me.activity.split(' ').pop()+' '+me.activity.split(' ').slice(0,-1).join(' ').substring(0,14);
+  };
+});
+$('clear-activity').onclick=e=>{e.stopPropagation();if(!me)return;
+  me.activity=null; players[me.id]={...me};
+  send({type:'activity',id:me.id,activity:null});
+  renderPlayers(); updateSidebar();
+  $('activity-btn').textContent='🎯 activity';
+  $('activity-menu').classList.remove('open');
 };
 
-// Close menu on outside click
-document.addEventListener('click', () => actMenu.classList.remove('open'));
-actMenu.addEventListener('click', e => e.stopPropagation());
+// ── Modals ────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.modal-close').forEach(btn=>{
+  btn.onclick=()=>$( btn.dataset.close).style.display='none';
+});
+document.querySelectorAll('.modal-overlay').forEach(ov=>{
+  ov.onclick=e=>{if(e.target===ov) ov.style.display='none';};
+});
+function openModal(id){$(id).style.display='flex';}
 
-// Sub-menu toggles (smoke, fish)
-document.querySelectorAll('.act-btn.has-sub').forEach(btn => {
-  btn.onclick = (e) => {
-    e.stopPropagation();
-    const subId = btn.dataset.sub;
-    const sub = $(subId);
-    const wasOpen = sub.classList.contains('open');
-    // Close all subs first
-    document.querySelectorAll('.act-sub').forEach(s => s.classList.remove('open'));
-    if (!wasOpen) sub.classList.add('open');
+$('dj-trigger').onclick=e=>{e.stopPropagation();openModal('dj-modal');};
+$('bar-trigger').onclick=e=>{e.stopPropagation();openModal('bar-modal');};
+$('game-trigger').onclick=e=>{e.stopPropagation();openModal('game-modal');initChess();};
+$('fish-trigger').onclick=e=>{e.stopPropagation();openModal('fish-modal');const cb=$('cast-btn');if(cb){cb.onclick=castFish;cb.disabled=false;cb.textContent='🎣 Cast Line';}};
+document.querySelector('.fish-area').onclick=e=>{e.stopPropagation();openModal('fish-modal');const cb=$('cast-btn');if(cb){cb.onclick=castFish;cb.disabled=false;cb.textContent='🎣 Cast Line';}};
+$('basement-trigger').onclick=e=>{e.stopPropagation();openModal('basement-modal');addChat(null,`${me?.name||'someone'} found the secret basement 👀`,true);send({type:'chat',id:me?.id,text:'🚪 just found the secret basement...'});};
+
+// ── DJ Booth ──────────────────────────────────────────────────────────────────
+$('dj-submit').onclick=()=>{
+  const val=$('dj-input').value.trim(); if(!val||!me) return;
+  send({type:'dj',id:me.id,text:val});
+  $('now-playing').style.display='block'; $('now-playing').textContent='🎵 '+val;
+  $('dj-nowplaying').textContent='Now playing: '+val;
+  $('dj-input').value='';
+  me.activity='spinning records 🎧'; players[me.id]={...me};
+  send({type:'activity',id:me.id,activity:me.activity});
+  renderPlayers(); updateSidebar();
+};
+
+// ── Bar ───────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.drink-btn').forEach(btn=>{
+  btn.onclick=()=>{if(!me)return;
+    me.activity=btn.dataset.drink; players[me.id]={...me};
+    send({type:'activity',id:me.id,activity:me.activity});
+    addChat(null,`${me.name} is ${me.activity}`,true);
+    renderPlayers(); updateSidebar();
+    $('bar-modal').style.display='none';
+    $('activity-btn').textContent=me.activity.split(' ').pop()+' '+me.activity.split(' ').slice(0,-1).join(' ').substring(0,14);
   };
 });
 
-// Activity selection
-document.querySelectorAll('.act-btn[data-activity]').forEach(btn => {
-  btn.onclick = (e) => {
-    e.stopPropagation();
-    if (!me) return;
-    const activity = btn.dataset.activity;
-    me.activity = activity;
-    players[me.id] = { ...me };
-    send({ type: 'activity', id: me.id, activity });
-    addChatMsg(null, `${me.name} is ${activity}`, true);
-    renderPlayers();
-    actMenu.classList.remove('open');
-    // Update button label
-    const emoji = activity.split(' ').pop();
-    actBtn.textContent = emoji + ' ' + activity.split(' ').slice(0,-1).join(' ').substring(0,12);
+// ── Chess ─────────────────────────────────────────────────────────────────────
+let chessBoard=[], chessTurn='w', chessSelected=null;
+const CHESS_INIT=[
+  ['r','n','b','q','k','b','n','r'],
+  ['p','p','p','p','p','p','p','p'],
+  [' ',' ',' ',' ',' ',' ',' ',' '],
+  [' ',' ',' ',' ',' ',' ',' ',' '],
+  [' ',' ',' ',' ',' ',' ',' ',' '],
+  [' ',' ',' ',' ',' ',' ',' ',' '],
+  ['P','P','P','P','P','P','P','P'],
+  ['R','N','B','Q','K','B','N','R'],
+];
+const CHESS_GLYPHS={r:'♜',n:'♞',b:'♝',q:'♛',k:'♚',p:'♟',R:'♖',N:'♘',B:'♗',Q:'♕',K:'♔',P:'♙'};
+
+function initChess(){
+  chessBoard=CHESS_INIT.map(r=>[...r]);
+  chessTurn='w'; chessSelected=null;
+  renderChess();
+  $('game-status').textContent="White's turn";
+}
+
+function renderChess(){
+  const board=$('chess-board'); board.innerHTML='';
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    const cell=document.createElement('div');
+    cell.className='cell '+((r+c)%2===0?'light':'dark');
+    const piece=chessBoard[r][c];
+    if(piece&&piece!==' ') cell.textContent=CHESS_GLYPHS[piece]||piece;
+    if(chessSelected&&chessSelected[0]===r&&chessSelected[1]===c) cell.classList.add('selected');
+    cell.onclick=()=>handleChessClick(r,c);
+    board.appendChild(cell);
+  }
+}
+
+function handleChessClick(r,c){
+  const piece=chessBoard[r][c];
+  const isWhite=piece===piece.toUpperCase()&&piece!==' ';
+  const isBlack=piece===piece.toLowerCase()&&piece!==' ';
+  if(!chessSelected){
+    if((chessTurn==='w'&&isWhite)||(chessTurn==='b'&&isBlack)){chessSelected=[r,c];renderChess();}
+  } else {
+    const [sr,sc]=chessSelected;
+    if(r===sr&&c===sc){chessSelected=null;renderChess();return;}
+    // Basic move — just allow any move for casual play
+    chessBoard[r][c]=chessBoard[sr][sc];
+    chessBoard[sr][sc]=' ';
+    chessSelected=null; chessTurn=chessTurn==='w'?'b':'w';
+    $('game-status').textContent=(chessTurn==='w'?"White's":"Black's")+' turn';
+    renderChess();
+  }
+}
+
+// ── Checkers ──────────────────────────────────────────────────────────────────
+let ckBoard=[], ckTurn='r', ckSelected=null;
+
+function initCheckers(){
+  ckBoard=Array(8).fill(null).map(()=>Array(8).fill(null));
+  for(let r=0;r<3;r++) for(let c=0;c<8;c++) if((r+c)%2!==0) ckBoard[r][c]={color:'b',king:false};
+  for(let r=5;r<8;r++) for(let c=0;c<8;c++) if((r+c)%2!==0) ckBoard[r][c]={color:'r',king:false};
+  ckTurn='r'; ckSelected=null; renderCheckers();
+  $('game-status').textContent="Red's turn";
+}
+
+function renderCheckers(){
+  const board=$('checkers-board'); board.innerHTML='';
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    const cell=document.createElement('div');
+    cell.className='cell '+((r+c)%2===0?'light':'dark');
+    const piece=ckBoard[r][c];
+    if(piece){
+      const ch=document.createElement('div');
+      ch.className='checker '+piece.color+(piece.king?' king':'');
+      ch.textContent=piece.king?'♔':'';
+      cell.appendChild(ch);
+    }
+    if(ckSelected&&ckSelected[0]===r&&ckSelected[1]===c) cell.classList.add('selected');
+    cell.onclick=()=>handleCheckersClick(r,c);
+    board.appendChild(cell);
+  }
+}
+
+function handleCheckersClick(r,c){
+  const piece=ckBoard[r][c];
+  if(!ckSelected){
+    if(piece&&piece.color===ckTurn){ckSelected=[r,c];renderCheckers();}
+  } else {
+    const [sr,sc]=ckSelected;
+    if(r===sr&&c===sc){ckSelected=null;renderCheckers();return;}
+    const dr=r-sr, dc=c-sc;
+    // Simple move
+    if(Math.abs(dr)===1&&Math.abs(dc)===1&&!ckBoard[r][c]){
+      ckBoard[r][c]=ckBoard[sr][sc]; ckBoard[sr][sc]=null;
+      if((ckBoard[r][c].color==='r'&&r===0)||(ckBoard[r][c].color==='b'&&r===7)) ckBoard[r][c].king=true;
+      ckSelected=null; ckTurn=ckTurn==='r'?'b':'r';
+      $('game-status').textContent=(ckTurn==='r'?"Red's":"Black's")+' turn';
+      renderCheckers();
+    } else if(Math.abs(dr)===2&&Math.abs(dc)===2){
+      const mr=sr+dr/2, mc=sc+dc/2;
+      if(ckBoard[mr][mc]&&ckBoard[mr][mc].color!==ckTurn){
+        ckBoard[r][c]=ckBoard[sr][sc]; ckBoard[sr][sc]=null; ckBoard[mr][mc]=null;
+        if((ckBoard[r][c].color==='r'&&r===0)||(ckBoard[r][c].color==='b'&&r===7)) ckBoard[r][c].king=true;
+        ckSelected=null; ckTurn=ckTurn==='r'?'b':'r';
+        $('game-status').textContent=(ckTurn==='r'?"Red's":"Black's")+' turn';
+        renderCheckers();
+      } else {ckSelected=null;renderCheckers();}
+    } else {ckSelected=null;renderCheckers();}
+  }
+}
+
+// ── Game tabs ─────────────────────────────────────────────────────────────────
+document.querySelectorAll('.game-tab').forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll('.game-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    if(tab.dataset.game==='chess'){
+      $('chess-board').style.display='grid'; $('checkers-board').style.display='none'; initChess();
+    } else {
+      $('chess-board').style.display='none'; $('checkers-board').style.display='grid'; initCheckers();
+    }
   };
 });
-
-// Clear activity
-$('clear-activity').onclick = (e) => {
-  e.stopPropagation();
-  if (!me) return;
-  me.activity = null;
-  players[me.id] = { ...me };
-  send({ type: 'activity', id: me.id, activity: null });
-  renderPlayers();
-  actBtn.textContent = '🎯 activity';
-  actMenu.classList.remove('open');
+$('game-reset').onclick=()=>{
+  const active=document.querySelector('.game-tab.active');
+  if(active.dataset.game==='chess') initChess(); else initCheckers();
 };
 
+// ── Fishing Minigame ──────────────────────────────────────────────────────────
+const FISH_CATCHES=[
+  {name:'🐟 Bluegill',rarity:'common',pts:5},{name:'🐠 Bass',rarity:'common',pts:8},
+  {name:'🎣 Catfish',rarity:'uncommon',pts:15},{name:'🐡 Trout',rarity:'uncommon',pts:18},
+  {name:'🦈 Baby Shark',rarity:'rare',pts:40},{name:'🐙 Octopus',rarity:'rare',pts:45},
+  {name:'👟 Old Boot',rarity:'common',pts:0},{name:'🗑️ Trash Bag',rarity:'common',pts:0},
+  {name:'💀 Mystery Bone',rarity:'uncommon',pts:20},{name:'🧜 Mermaid',rarity:'legendary',pts:100},
+];
+let fishing=false, fishInterval=null, fishProgress=0;
+
+function castFish(){
+  if(fishing) return;
+  fishing=true; fishProgress=0;
+  const castBtn=$('cast-btn');
+  castBtn.textContent='🌊 Waiting for a bite...';
+  castBtn.disabled=true;
+  $('fish-meter-wrap').style.display='block';
+  $('fish-result').textContent='';
+  $('fish-msg').textContent='Keep your eyes on the line...';
+  clearInterval(fishInterval);
+  fishInterval=setInterval(()=>{fishProgress=(fishProgress+2)%100;$('fish-meter').style.width=fishProgress+'%';},80);
+  const waitTime=3000+Math.random()*5000;
+  setTimeout(()=>{
+    if(!fishing) return;
+    $('fish-msg').textContent='⚡ BITE! Click Reel In!';
+    castBtn.textContent='🎣 Reel In!';
+    castBtn.disabled=false;
+    fishing='bite';
+    const escapeTimer=setTimeout(()=>{
+      $('fish-msg').textContent='It got away! 😞';
+      $('fish-result').textContent='~';
+      endFish();
+    },3000);
+    castBtn.onclick=()=>{
+      clearTimeout(escapeTimer);
+      const roll=Math.random();
+      let pool;
+      if(roll<.5) pool=FISH_CATCHES.filter(f=>f.rarity==='common');
+      else if(roll<.8) pool=FISH_CATCHES.filter(f=>f.rarity==='uncommon');
+      else if(roll<.97) pool=FISH_CATCHES.filter(f=>f.rarity==='rare');
+      else pool=FISH_CATCHES.filter(f=>f.rarity==='legendary');
+      const catch_=pool[Math.floor(Math.random()*pool.length)];
+      $('fish-result').textContent=catch_.name;
+      $('fish-msg').textContent=catch_.pts?`Nice catch! +${catch_.pts} pts`:'Better luck next time...';
+      if(catch_.pts&&me) addChat(null,`${me.name} caught ${catch_.name}! 🎣`,true);
+      endFish();
+    };
+  },waitTime);
+}
+
+function endFish(){
+  fishing=false;
+  clearInterval(fishInterval);
+  $('fish-meter-wrap').style.display='none';
+  $('fish-meter').style.width='0%';
+  setTimeout(()=>{
+    const castBtn=$('cast-btn');
+    if(castBtn){ castBtn.textContent='🎣 Cast Line'; castBtn.disabled=false; castBtn.onclick=castFish; }
+  },1800);
+}
+
+// ── Join // ── Join ──────────────────────────────────────────────────────────────────────
+$('join-btn').onclick=()=>{
+  const name=$('name-input').value.trim()||'anon';
+  me={id:name+'_'+Math.random().toString(36).slice(2,7),name,color:chosenColor,x:25+Math.random()*50,y:32+Math.random()*18,bubble:null,activity:null};
+  players[me.id]={...me};
+  $('login-panel').style.display='none';
+  connectWS();
+  send({type:'join',player:{...me}});
+  addChat(null,`you joined as ${name} — click to move!`,true);
+  renderPlayers(); updateSidebar();
+  setInterval(()=>{if(me)send({type:'join',player:{...me}});},10000);
+  window.addEventListener('beforeunload',()=>{if(me)send({type:'leave',id:me.id});});
+};
+$('name-input').onkeydown=e=>{if(e.key==='Enter')$('join-btn').click();};
+
+});
 </script>
 </body>
 </html>
