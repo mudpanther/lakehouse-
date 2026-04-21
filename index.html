@@ -738,6 +738,17 @@ const SLOT_WEIGHTS=[30,20,18,14,10,6,2];
 
 document.addEventListener('DOMContentLoaded',()=>{
 
+// ── Poker action delegation (must be global-accessible via event delegation)
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('[data-action]');
+  if(!btn) return;
+  const action = btn.dataset.action;
+  if(['fold','call','raise'].includes(action) && me){
+    send({type:'poker-action', action});
+    btn.disabled = true;
+  }
+});
+
 // ── Trees ─────────────────────────────────────────────────────────────────────
 const tr=$('px-trees');
 const treeColors=['#1b5e20','#2e7d32','#1a4a10','#2a6a18','#0d3b0d'];
@@ -935,8 +946,9 @@ function sendChat(){
   }
   if(txt.startsWith('/me ')){
     const action=txt.slice(4);
-    send({type:'chat',id:me.id,text:`* ${me.name} ${action}`});
-    addChat(me.id,`* ${me.name} ${action}`);return;
+    const emote='* '+me.name+' '+action;
+    send({type:'chat',id:me.id,text:emote});
+    addChat(null,emote,true);return;
   }
   me.bubble=txt;players[me.id]={...me};
   addChat(me.id,txt);send({type:'chat',id:me.id,text:txt});renderPlayers();
@@ -1074,7 +1086,7 @@ function updatePokerUI(msg){
     return '<div class="'+cls+'">'+esc(p.name)+(p.id===me?.id?' *':'')+'</div>';
   }).join('');
   if(myTurn){
-    $('poker-actions').innerHTML='<button class="px-btn red" onclick="pokerAction(\'fold\')">FOLD</button> <button class="px-btn green" onclick="pokerAction(\'call\')">CALL +20</button> <button class="px-btn" onclick="pokerAction(\'raise\')">RAISE +40</button>';
+    $('poker-actions').innerHTML='<button class="px-btn red" data-action="fold">FOLD</button><button class="px-btn green" data-action="call">CALL +20</button><button class="px-btn" data-action="raise">RAISE +40</button>';
   }else{
     $('poker-actions').innerHTML='';
   }
