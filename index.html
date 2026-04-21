@@ -8,214 +8,267 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;image-rendering:pixelated;}
 body{background:#1a0a00;display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden;font-family:'Press Start 2P',monospace;}
-
 #wrapper{display:flex;width:100vw;height:100vh;}
 
-/* ── OSRS Sidebar ── */
-#sidebar{
-  width:200px;min-width:200px;
-  background:#2c1810;
-  border-right:4px solid #8b6914;
-  display:flex;flex-direction:column;
-  position:relative;z-index:20;
-  box-shadow:inset -3px 0 0 #4a2a10, inset 3px 0 0 #5a3a18;
-}
-#sb-header{
-  padding:10px 8px 8px;
-  border-bottom:4px solid #8b6914;
-  background:linear-gradient(to bottom,#3a2010,#2c1810);
-  text-align:center;
-}
-#sb-header h2{font-size:8px;color:#ffcc44;text-shadow:1px 1px 0 #000,2px 2px 0 #8b4500;letter-spacing:1px;}
-#sb-header p{font-size:6px;color:#bb8833;margin-top:4px;}
-#online-list{flex:1;overflow-y:auto;padding:6px 4px;}
-#online-list::-webkit-scrollbar{width:6px;}
-#online-list::-webkit-scrollbar-track{background:#1a0a00;}
-#online-list::-webkit-scrollbar-thumb{background:#8b6914;border:1px solid #4a2a00;}
-.sb-section{font-size:6px;color:#ffcc44;padding:5px 5px 3px;text-shadow:1px 1px 0 #000;border-bottom:2px solid #4a2a10;margin-bottom:4px;}
-.sb-player{display:flex;align-items:center;gap:5px;padding:4px 5px;border:2px solid transparent;transition:border-color .1s;cursor:default;}
+/* ── SIDEBAR ── */
+#sidebar{width:195px;min-width:195px;background:#2c1810;border-right:4px solid #8b6914;display:flex;flex-direction:column;z-index:20;box-shadow:inset -3px 0 0 #4a2a10;}
+#sb-header{padding:10px 8px 8px;border-bottom:4px solid #8b6914;background:linear-gradient(to bottom,#3a2010,#2c1810);text-align:center;}
+#sb-header h2{font-size:8px;color:#ffcc44;text-shadow:1px 1px 0 #000,2px 2px 0 #8b4500;}
+#sb-bucks{font-size:7px;color:#ffee88;margin-top:4px;text-shadow:1px 1px 0 #000;}
+#online-list{flex:1;overflow-y:auto;padding:4px;}
+#online-list::-webkit-scrollbar{width:5px;}
+#online-list::-webkit-scrollbar-thumb{background:#8b6914;}
+.sb-section{font-size:6px;color:#ffcc44;padding:4px 4px 2px;border-bottom:2px solid #4a2a10;margin-bottom:3px;}
+.sb-player{display:flex;align-items:center;gap:5px;padding:3px 4px;border:2px solid transparent;}
 .sb-player:hover{border-color:#8b6914;background:rgba(139,105,20,.1);}
-.sb-dot{width:8px;height:8px;flex-shrink:0;border:2px solid #000;image-rendering:pixelated;}
+.sb-dot{width:8px;height:8px;flex-shrink:0;border:2px solid #000;}
 .sb-info{flex:1;min-width:0;}
 .sb-name{font-size:6px;color:#ffdd88;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:1px 1px 0 #000;}
-.sb-status{font-size:5px;color:#aa7733;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.sb-status{font-size:5px;color:#aa7733;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
 .sb-act{font-size:11px;flex-shrink:0;}
-#sb-footer{padding:6px;border-top:4px solid #8b6914;font-size:5px;color:#664422;text-align:center;background:#1a0a00;}
+#sb-footer{padding:6px 4px;border-top:4px solid #8b6914;display:flex;flex-direction:column;gap:4px;}
+.sb-btn{font-family:'Press Start 2P',monospace;font-size:6px;padding:5px 4px;border:2px solid #8b6914;background:#1a0a00;color:#ffcc44;cursor:pointer;text-align:center;width:100%;}
+.sb-btn:hover{background:#3a2010;}
 
-/* ── Main ── */
+/* ── MAIN ── */
 #main{flex:1;position:relative;overflow:hidden;}
 #game-canvas{width:100%;height:100%;position:relative;cursor:crosshair;overflow:hidden;}
 
-/* ── Pixel Scene ── */
-.scene{position:absolute;inset:0;}
+/* ── WEATHER OVERLAY ── */
+#weather-overlay{position:absolute;inset:0;pointer-events:none;z-index:3;transition:background .5s;}
+.rain-drop{position:absolute;width:2px;background:rgba(150,180,255,.6);animation:rain-fall linear infinite;}
+@keyframes rain-fall{from{transform:translateY(-20px)}to{transform:translateY(110vh)}}
+#night-overlay{position:absolute;inset:0;pointer-events:none;z-index:2;background:rgba(0,0,40,0);transition:background 3s;}
 
-/* Sky - pixel gradient bands */
+/* ── PIXEL SCENE ── */
 .px-sky{position:absolute;top:0;left:0;right:0;height:44%;}
 .px-sky-1{position:absolute;top:0;left:0;right:0;height:25%;background:#1a2a6e;}
 .px-sky-2{position:absolute;top:25%;left:0;right:0;height:25%;background:#2a4a9e;}
 .px-sky-3{position:absolute;top:50%;left:0;right:0;height:25%;background:#3a6abe;}
 .px-sky-4{position:absolute;top:75%;left:0;right:0;height:25%;background:#5a8ade;}
-
-/* Pixel sun */
-.px-sun{position:absolute;top:12px;right:90px;width:32px;height:32px;background:#ffee22;box-shadow:4px 0 0 #ffee22,-4px 0 0 #ffee22,0 4px 0 #ffee22,0 -4px 0 #ffee22,4px 4px 0 #ffcc00,-4px 4px 0 #ffcc00,4px -4px 0 #ffcc00,-4px -4px 0 #ffcc00;border:2px solid #cc9900;}
-
-/* Pixel clouds */
-.px-cloud{position:absolute;image-rendering:pixelated;}
-.px-cloud::before,.px-cloud::after{content:'';position:absolute;background:#eeeeff;}
-.px-cloud{background:#eeeeff;}
-
-/* Ground - pixel texture */
+.px-sun{position:absolute;top:12px;right:90px;width:32px;height:32px;background:#ffee22;box-shadow:4px 0 0 #ffee22,-4px 0 0 #ffee22,0 4px 0 #ffee22,0 -4px 0 #ffee22,4px 4px 0 #ffcc00,-4px 4px 0 #ffcc00,4px -4px 0 #ffcc00,-4px -4px 0 #ffcc00;border:2px solid #cc9900;transition:opacity 2s;}
+.px-moon{position:absolute;top:12px;right:90px;width:28px;height:28px;background:#ddeeff;border-radius:50%;box-shadow:4px 0 0 #ddeeff,-4px 0 0 #ddeeff;border:2px solid #aabbcc;opacity:0;transition:opacity 2s;}
 .px-ground{position:absolute;left:0;right:0;bottom:0;height:56%;}
 .px-ground-top{position:absolute;top:0;left:0;right:0;height:6px;background:repeating-linear-gradient(90deg,#5a9a28 0,#5a9a28 4px,#4a8a18 4px,#4a8a18 8px);}
 .px-ground-body{position:absolute;top:6px;left:0;right:0;bottom:0;background:repeating-linear-gradient(180deg,#3a7a10 0,#3a7a10 4px,#2a6a00 4px,#2a6a00 8px);}
-
-/* Lake - pixel water */
 .px-lake{position:absolute;bottom:10%;left:5%;width:90%;height:27%;overflow:hidden;}
 .px-lake-body{position:absolute;inset:0;background:repeating-linear-gradient(180deg,#1a5a9a 0,#1a5a9a 4px,#0a4a8a 4px,#0a4a8a 8px);}
 .px-lake-edge{position:absolute;top:0;left:0;right:0;height:4px;background:repeating-linear-gradient(90deg,#4a9ade 0,#4a9ade 8px,#1a5a9a 8px,#1a5a9a 16px);}
 .px-lake-shine{position:absolute;top:8px;left:15%;width:20%;height:4px;background:repeating-linear-gradient(90deg,#8acaee 0,#8acaee 4px,transparent 4px,transparent 8px);}
 .px-lake-shine2{position:absolute;top:16px;left:55%;width:14%;height:4px;background:repeating-linear-gradient(90deg,#8acaee 0,#8acaee 4px,transparent 4px,transparent 8px);}
-
-/* Pixel dock */
 .px-dock{position:absolute;bottom:27%;left:50%;transform:translateX(-50%);}
 .px-dock-plank{width:88px;height:8px;background:repeating-linear-gradient(90deg,#8b5e2a 0,#8b5e2a 8px,#7a4e1a 8px,#7a4e1a 16px);border-top:2px solid #aa7e3a;border-bottom:2px solid #4a2a00;}
 .px-dock-post{position:absolute;bottom:27%;width:8px;background:repeating-linear-gradient(180deg,#6b4010 0,#6b4010 4px,#5a3000 4px,#5a3000 8px);border:1px solid #3a1a00;}
 
-/* ── Pixel Sprites (SVG inline) ── */
-/* House sprite */
+/* Sprites */
 .px-house{position:absolute;bottom:54%;right:5%;}
-/* DJ booth */
 .px-dj{position:absolute;bottom:54%;left:3%;}
-/* Bar */
 .px-bar{position:absolute;bottom:54%;left:20%;}
-/* Game table */
-.px-gametable{position:absolute;bottom:54%;left:40%;}
-/* Campfire */
-.px-campfire{position:absolute;bottom:57%;left:60%;}
-/* Fishing */
+.px-gametable{position:absolute;bottom:54%;left:39%;}
+.px-slots{position:absolute;bottom:54%;left:57%;}
+.px-campfire{position:absolute;bottom:57%;left:71%;}
 .px-fishing{position:absolute;bottom:29%;right:8%;cursor:pointer;}
-/* Boat */
 .px-boat{position:absolute;bottom:15%;left:24%;}
-/* Basement door */
+.px-poker{position:absolute;bottom:54%;right:18%;}
+.px-tv{position:absolute;bottom:54%;right:14%;}
 .px-basement{position:absolute;bottom:54%;right:8.5%;cursor:pointer;}
-
-.scene-tag{font-family:'Press Start 2P',monospace;font-size:5px;color:#ffcc44;text-align:center;margin-top:3px;text-shadow:1px 1px 0 #000;white-space:nowrap;}
-
-/* ── Pixel Trees ── */
+.scene-tag{font-size:5px;color:#ffcc44;text-align:center;margin-top:2px;text-shadow:1px 1px 0 #000;white-space:nowrap;}
 #px-trees{position:absolute;bottom:54%;left:0;right:0;height:140px;display:flex;align-items:flex-end;overflow:hidden;pointer-events:none;}
 
-/* ── Players (pixel avatars) ── */
-#players-layer{position:absolute;inset:0;pointer-events:none;}
-.player{position:absolute;display:flex;flex-direction:column;align-items:center;gap:1px;transform:translate(-50%,-100%);transition:left .12s,bottom .12s;pointer-events:none;}
-.player-activity{font-size:13px;line-height:1;margin-bottom:1px;}
-.player-bubble{font-family:'Press Start 2P',monospace;font-size:7px;background:#2c1810;border:2px solid #8b6914;padding:3px 6px;border-radius:0;max-width:110px;text-align:center;word-break:break-word;margin-bottom:2px;color:#ffdd88;line-height:1.4;box-shadow:2px 2px 0 #000;image-rendering:pixelated;}
-.player-name{font-family:'Press Start 2P',monospace;font-size:6px;font-weight:400;color:#ffdd88;background:#1a0a00;padding:2px 5px;border:1px solid #8b6914;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;text-shadow:1px 1px 0 #000;box-shadow:1px 1px 0 #000;}
+/* ── PLAYERS ── */
+#players-layer{position:absolute;inset:0;pointer-events:none;z-index:4;}
+.player{position:absolute;display:flex;flex-direction:column;align-items:center;gap:1px;transform:translate(-50%,-100%);transition:left .12s,bottom .12s;}
+.player-hat{font-size:14px;line-height:1;margin-bottom:-2px;}
+.player-activity{font-size:12px;line-height:1;margin-bottom:1px;}
+.player-bubble{font-size:7px;background:#2c1810;border:2px solid #8b6914;padding:2px 5px;max-width:110px;text-align:center;word-break:break-word;margin-bottom:2px;color:#ffdd88;line-height:1.4;box-shadow:2px 2px 0 #000;}
+.player-name{font-size:6px;color:#ffdd88;background:#1a0a00;padding:1px 4px;border:1px solid #8b6914;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;text-shadow:1px 1px 0 #000;box-shadow:1px 1px 0 #000;}
 
-/* ── Zone label ── */
-#zone-label{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);font-family:'Press Start 2P',monospace;font-size:8px;color:#ffcc44;background:#2c1810;border:3px solid #8b6914;padding:6px 14px;pointer-events:none;display:none;text-shadow:1px 1px 0 #000;box-shadow:3px 3px 0 #000,inset 1px 1px 0 #aa8824;}
+/* Reaction burst */
+.reaction-burst{position:absolute;font-size:28px;pointer-events:none;animation:burst .8s ease-out forwards;z-index:10;}
+@keyframes burst{0%{transform:translate(-50%,-100%) scale(0.5);opacity:1;}100%{transform:translate(-50%,-220%) scale(1.4);opacity:0;}}
+
+/* Announcement banner */
+#announcement{position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:9px;color:#ffee00;background:#1a0a00;border:3px solid #ffcc44;padding:6px 14px;z-index:15;display:none;box-shadow:3px 3px 0 #000;text-shadow:1px 1px 0 #000;white-space:nowrap;}
+
+/* Zone label */
+#zone-label{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);font-size:7px;color:#ffcc44;background:#2c1810;border:3px solid #8b6914;padding:5px 12px;pointer-events:none;display:none;text-shadow:1px 1px 0 #000;box-shadow:3px 3px 0 #000;z-index:6;}
 
 /* ── HUD ── */
-#hud{position:absolute;top:8px;left:8px;display:flex;gap:6px;z-index:5;pointer-events:none;}
-.hud-pill{font-family:'Press Start 2P',monospace;font-size:7px;color:#ffcc44;background:#2c1810;border:2px solid #8b6914;padding:4px 8px;text-shadow:1px 1px 0 #000;box-shadow:2px 2px 0 #000;}
+#hud{position:absolute;top:8px;left:8px;display:flex;gap:5px;z-index:5;pointer-events:none;}
+.hud-pill{font-size:7px;color:#ffcc44;background:#2c1810;border:2px solid #8b6914;padding:3px 7px;text-shadow:1px 1px 0 #000;box-shadow:2px 2px 0 #000;}
+#time-pill{display:flex;align-items:center;gap:4px;}
 
-/* ── OSRS Chat Panel ── */
-#chat-panel{position:absolute;bottom:10px;right:10px;width:260px;display:flex;flex-direction:column;gap:4px;z-index:5;}
-#chat-messages{background:#1a0a00;border:3px solid #8b6914;box-shadow:inset 2px 2px 0 #000,3px 3px 0 #000;height:150px;overflow-y:auto;padding:6px 8px;display:flex;flex-direction:column;gap:3px;}
-#chat-messages::-webkit-scrollbar{width:6px;}
-#chat-messages::-webkit-scrollbar-track{background:#1a0a00;}
+/* ── CHAT ── */
+#chat-panel{position:absolute;bottom:10px;right:10px;width:255px;display:flex;flex-direction:column;gap:3px;z-index:5;}
+#chat-messages{background:#1a0a00;border:3px solid #8b6914;box-shadow:inset 2px 2px 0 #000,3px 3px 0 #000;height:140px;overflow-y:auto;padding:5px 7px;display:flex;flex-direction:column;gap:3px;}
+#chat-messages::-webkit-scrollbar{width:5px;}
 #chat-messages::-webkit-scrollbar-thumb{background:#8b6914;}
-.chat-msg{font-family:'Press Start 2P',monospace;font-size:7px;line-height:1.6;color:#ffdd88;}
-.msg-sys{color:#aa8833;font-style:normal;}
-#chat-input-row{display:flex;gap:4px;}
-#chat-input{flex:1;font-family:'Press Start 2P',monospace;font-size:8px;padding:6px 8px;border:3px solid #8b6914;background:#1a0a00;color:#ffdd88;outline:none;box-shadow:inset 2px 2px 0 #000;}
+.chat-msg{font-size:7px;line-height:1.6;color:#ffdd88;}
+.msg-sys{color:#aa8833;}
+#chat-input-row{display:flex;gap:3px;}
+#chat-input{flex:1;font-size:8px;padding:5px 7px;border:3px solid #8b6914;background:#1a0a00;color:#ffdd88;outline:none;font-family:'Press Start 2P',monospace;}
 #chat-input:focus{border-color:#ffcc44;}
-#chat-send{font-family:'Press Start 2P',monospace;font-size:7px;padding:6px 10px;border:3px solid #8b6914;background:#3a2010;color:#ffcc44;cursor:pointer;white-space:nowrap;box-shadow:2px 2px 0 #000;transition:background .1s;}
+#chat-send{font-size:7px;padding:5px 9px;border:3px solid #8b6914;background:#3a2010;color:#ffcc44;cursor:pointer;font-family:'Press Start 2P',monospace;box-shadow:2px 2px 0 #000;}
 #chat-send:hover{background:#5a3a18;}
-#chat-send:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #000;}
 
-/* ── Activity button (OSRS style) ── */
-#activity-btn{position:absolute;bottom:10px;left:8px;z-index:5;font-family:'Press Start 2P',monospace;font-size:7px;padding:7px 12px;border:3px solid #8b6914;background:#3a2010;color:#ffcc44;cursor:pointer;box-shadow:2px 2px 0 #000,inset 1px 1px 0 #6a4018;text-shadow:1px 1px 0 #000;}
+/* Reactions bar */
+#reactions-bar{position:absolute;bottom:52px;right:10px;display:flex;gap:4px;z-index:5;}
+.react-btn{font-size:16px;cursor:pointer;padding:3px;border:2px solid #4a2a10;background:#2c1810;transition:transform .1s;box-shadow:2px 2px 0 #000;}
+.react-btn:hover{transform:scale(1.2);border-color:#8b6914;}
+
+/* ── ACTIVITY BTN ── */
+#activity-btn{position:absolute;bottom:10px;left:8px;z-index:5;font-size:7px;padding:6px 10px;border:3px solid #8b6914;background:#3a2010;color:#ffcc44;cursor:pointer;font-family:'Press Start 2P',monospace;box-shadow:2px 2px 0 #000;text-shadow:1px 1px 0 #000;}
 #activity-btn:hover{background:#5a3a18;}
-#activity-btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #000;}
-#activity-menu{position:absolute;bottom:50px;left:8px;z-index:10;background:#2c1810;border:3px solid #8b6914;padding:8px;display:none;flex-direction:column;gap:4px;min-width:200px;box-shadow:4px 4px 0 #000;}
+#activity-menu{position:absolute;bottom:48px;left:8px;z-index:10;background:#2c1810;border:3px solid #8b6914;padding:7px;display:none;flex-direction:column;gap:3px;min-width:195px;box-shadow:4px 4px 0 #000;}
 #activity-menu.open{display:flex;}
-.act-sec{font-family:'Press Start 2P',monospace;font-size:5px;color:#8b6914;padding:2px 4px;border-bottom:2px solid #4a2a10;margin-bottom:2px;}
-.act-btn{font-family:'Press Start 2P',monospace;padding:6px 10px;border:2px solid #4a2a10;background:transparent;color:#ffdd88;font-size:7px;cursor:pointer;text-align:left;transition:background .1s;}
+.act-sec{font-size:5px;color:#8b6914;padding:2px 4px;border-bottom:2px solid #4a2a10;margin-bottom:2px;}
+.act-btn{font-family:'Press Start 2P',monospace;padding:5px 9px;border:2px solid #4a2a10;background:transparent;color:#ffdd88;font-size:6px;cursor:pointer;text-align:left;}
 .act-btn:hover{background:#4a2a10;border-color:#8b6914;}
 .act-btn.has-sub::after{content:" >";color:#8b6914;}
-.act-sub{display:none;flex-direction:column;gap:3px;padding-left:10px;border-left:2px solid #4a2a10;margin-left:5px;}
+.act-sub{display:none;flex-direction:column;gap:2px;padding-left:8px;border-left:2px solid #4a2a10;margin-left:4px;}
 .act-sub.open{display:flex;}
-.act-clear{font-family:'Press Start 2P',monospace;padding:5px 10px;border:2px solid #6a2210;background:transparent;color:#ee6644;font-size:6px;cursor:pointer;text-align:left;margin-top:3px;}
+.act-clear{font-family:'Press Start 2P',monospace;padding:4px 9px;border:2px solid #6a2210;background:transparent;color:#ee6644;font-size:6px;cursor:pointer;margin-top:2px;}
 .act-clear:hover{background:#3a1008;}
 
-/* ── Login (OSRS style) ── */
-#login-panel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.75);z-index:30;}
-.login-card{background:#2c1810;border:4px solid #8b6914;padding:1.8rem;width:310px;display:flex;flex-direction:column;gap:12px;box-shadow:6px 6px 0 #000,inset 2px 2px 0 #6a4018,inset -2px -2px 0 #1a0800;}
-.login-card h2{font-family:'Press Start 2P',monospace;font-size:12px;color:#ffcc44;text-align:center;text-shadow:2px 2px 0 #000,0 0 10px #aa6600;}
-.login-card p{font-family:'Press Start 2P',monospace;font-size:6px;color:#aa8833;line-height:2;text-align:center;}
-.login-card input{font-family:'Press Start 2P',monospace;font-size:9px;padding:8px 10px;border:3px solid #8b6914;background:#1a0a00;color:#ffdd88;outline:none;box-shadow:inset 2px 2px 0 #000;}
+/* ── LOGIN ── */
+#login-panel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.78);z-index:30;}
+.login-card{background:#2c1810;border:4px solid #8b6914;padding:1.6rem;width:310px;display:flex;flex-direction:column;gap:11px;box-shadow:6px 6px 0 #000,inset 2px 2px 0 #6a4018;}
+.login-card h2{font-size:11px;color:#ffcc44;text-align:center;text-shadow:2px 2px 0 #000,0 0 10px #aa6600;}
+.login-card p{font-size:6px;color:#aa8833;line-height:2;text-align:center;}
+.login-card input{font-size:9px;padding:7px 9px;border:3px solid #8b6914;background:#1a0a00;color:#ffdd88;outline:none;font-family:'Press Start 2P',monospace;}
 .login-card input:focus{border-color:#ffcc44;}
-.color-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
-.cswatch{width:24px;height:24px;cursor:pointer;border:3px solid transparent;transition:border-color .1s;image-rendering:pixelated;}
+.color-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;}
+.cswatch{width:24px;height:24px;cursor:pointer;border:3px solid transparent;}
 .cswatch:hover{border-color:#ffcc44;}
 .cswatch.sel{border-color:#ffcc44;box-shadow:0 0 0 1px #000;}
-#join-btn{font-family:'Press Start 2P',monospace;padding:10px;border:3px solid #8b6914;background:#3a5a1a;color:#aaffaa;cursor:pointer;font-size:9px;text-align:center;box-shadow:3px 3px 0 #000,inset 1px 1px 0 #5a8a2a;text-shadow:1px 1px 0 #000;transition:background .15s;}
+#join-btn{font-family:'Press Start 2P',monospace;padding:10px;border:3px solid #8b6914;background:#3a5a1a;color:#aaffaa;cursor:pointer;font-size:8px;text-align:center;box-shadow:3px 3px 0 #000,inset 1px 1px 0 #5a8a2a;text-shadow:1px 1px 0 #000;}
 #join-btn:hover{background:#5a8a2a;}
-#join-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000;}
-#ws-note{font-family:'Press Start 2P',monospace;font-size:5px;color:#664422;text-align:center;}
+#ws-note{font-size:5px;color:#664422;text-align:center;}
 
-/* ── Modals (OSRS style) ── */
-.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);z-index:25;display:flex;align-items:center;justify-content:center;}
-.modal-box{background:#2c1810;border:4px solid #8b6914;padding:1.2rem;min-width:300px;box-shadow:6px 6px 0 #000,inset 2px 2px 0 #6a4018;}
-.modal-box h3{font-family:'Press Start 2P',monospace;font-size:10px;color:#ffcc44;margin-bottom:12px;text-shadow:2px 2px 0 #000;}
-.modal-close{float:right;background:#4a1808;border:2px solid #8b3010;color:#ffaa88;font-size:14px;cursor:pointer;line-height:1;padding:2px 6px;font-family:'Press Start 2P',monospace;}
+/* ── MODALS ── */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.72);z-index:25;display:flex;align-items:center;justify-content:center;}
+.modal-box{background:#2c1810;border:4px solid #8b6914;padding:1.1rem;min-width:290px;box-shadow:6px 6px 0 #000,inset 2px 2px 0 #6a4018;max-height:90vh;overflow-y:auto;}
+.modal-box::-webkit-scrollbar{width:5px;}
+.modal-box::-webkit-scrollbar-thumb{background:#8b6914;}
+.modal-box h3{font-size:9px;color:#ffcc44;margin-bottom:10px;text-shadow:2px 2px 0 #000;}
+.modal-close{float:right;background:#4a1808;border:2px solid #8b3010;color:#ffaa88;font-size:13px;cursor:pointer;padding:2px 5px;font-family:'Press Start 2P',monospace;}
 .modal-close:hover{background:#6a2010;}
+.px-input{width:100%;font-family:'Press Start 2P',monospace;font-size:8px;padding:6px 8px;border:3px solid #8b6914;background:#1a0a00;color:#ffdd88;outline:none;margin-bottom:7px;}
+.px-btn{font-family:'Press Start 2P',monospace;padding:7px 12px;border:3px solid #8b6914;background:#1a3a5a;color:#88ddff;cursor:pointer;font-size:7px;box-shadow:2px 2px 0 #000;}
+.px-btn:hover{background:#2a5a8a;}
+.px-btn.green{background:#1a4a1a;color:#aaffaa;border-color:#4a8a4a;}
+.px-btn.green:hover{background:#2a6a2a;}
+.px-btn.red{background:#4a1a1a;color:#ffaaaa;border-color:#8a3a3a;}
+.px-btn.red:hover{background:#6a2a2a;}
 
-/* DJ modal */
-#dj-input{width:100%;font-family:'Press Start 2P',monospace;font-size:8px;padding:7px 9px;border:3px solid #8b6914;background:#1a0a00;color:#ffdd88;outline:none;margin-bottom:8px;}
-#dj-submit{font-family:'Press Start 2P',monospace;padding:7px 14px;border:3px solid #8b6914;background:#1a3a5a;color:#88ddff;cursor:pointer;font-size:7px;box-shadow:2px 2px 0 #000;}
-#dj-submit:hover{background:#2a5a8a;}
-#dj-nowplaying{font-family:'Press Start 2P',monospace;font-size:7px;color:#44ccff;margin-top:8px;word-break:break-all;line-height:1.8;}
+/* DJ */
+#dj-nowplaying{font-size:7px;color:#44ccff;margin-top:7px;word-break:break-all;line-height:1.8;}
+#now-playing{position:absolute;bottom:64%;left:2%;font-size:7px;color:#44ccff;background:#0a1a2a;border:2px solid #1a5a9a;padding:3px 7px;max-width:175px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none;box-shadow:2px 2px 0 #000;}
 
-/* Bar modal */
-.drink-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
-.drink-btn{font-family:'Press Start 2P',monospace;padding:8px 6px;border:2px solid #4a2a10;background:#1a0a00;color:#ffdd88;font-size:7px;cursor:pointer;text-align:center;transition:background .1s;}
+/* Bar */
+.drink-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px;}
+.drink-btn{font-family:'Press Start 2P',monospace;padding:7px 5px;border:2px solid #4a2a10;background:#1a0a00;color:#ffdd88;font-size:6px;cursor:pointer;text-align:center;}
 .drink-btn:hover{background:#3a2010;border-color:#8b6914;}
 
 /* Chess/Checkers */
-#game-modal .modal-box{min-width:420px;}
-#game-tabs{display:flex;gap:4px;margin-bottom:10px;}
-.game-tab{font-family:'Press Start 2P',monospace;padding:5px 12px;border:2px solid #4a2a10;background:transparent;color:#aa8833;font-size:7px;cursor:pointer;}
+#game-modal .modal-box{min-width:400px;}
+#game-tabs{display:flex;gap:4px;margin-bottom:8px;}
+.game-tab{font-family:'Press Start 2P',monospace;padding:5px 10px;border:2px solid #4a2a10;background:transparent;color:#aa8833;font-size:6px;cursor:pointer;}
 .game-tab.active{background:#3a5a1a;color:#aaffaa;border-color:#6a8a3a;}
-#chess-board,#checkers-board{display:grid;grid-template-columns:repeat(8,40px);grid-template-rows:repeat(8,40px);border:3px solid #4a2a10;margin:0 auto;box-shadow:3px 3px 0 #000;}
-.cell{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;user-select:none;image-rendering:pixelated;}
+#chess-board,#checkers-board{display:grid;grid-template-columns:repeat(8,38px);grid-template-rows:repeat(8,38px);border:3px solid #4a2a10;margin:0 auto;box-shadow:3px 3px 0 #000;}
+.cell{width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;user-select:none;}
 .cell.light{background:#e8c870;}
 .cell.dark{background:#8a4a10;}
-.cell.selected{outline:3px solid #ffee00;outline-offset:-3px;background:#aacc44 !important;}
-.cell.valid-move::after{content:'';position:absolute;width:16px;height:16px;background:rgba(0,200,0,.4);border-radius:50%;}
-.checker{width:32px;height:32px;border-radius:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-family:'Press Start 2P',monospace;border:3px solid rgba(0,0,0,.5);}
+.cell.selected{outline:3px solid #ffee00;outline-offset:-3px;background:#aacc44!important;}
+.checker{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'Press Start 2P',monospace;border:3px solid rgba(0,0,0,.5);}
 .checker.red{background:#cc2200;border-color:#ff4422;}
 .checker.black{background:#222;border-color:#444;}
-#game-status{font-family:'Press Start 2P',monospace;font-size:7px;color:#ffcc44;margin-top:8px;text-align:center;text-shadow:1px 1px 0 #000;}
-#game-reset{font-family:'Press Start 2P',monospace;margin-top:8px;padding:6px 12px;border:2px solid #4a2a10;background:transparent;color:#aa8833;font-size:7px;cursor:pointer;}
+#game-status{font-size:7px;color:#ffcc44;margin-top:7px;text-align:center;text-shadow:1px 1px 0 #000;}
+#game-reset{font-family:'Press Start 2P',monospace;margin-top:7px;padding:5px 10px;border:2px solid #4a2a10;background:transparent;color:#aa8833;font-size:6px;cursor:pointer;}
 #game-reset:hover{background:#3a2010;}
 
 /* Fishing */
-#fish-modal .modal-box{min-width:300px;text-align:center;}
-#cast-btn{font-family:'Press Start 2P',monospace;padding:9px 20px;border:3px solid #1a5a9a;background:#0a2a5a;color:#88ccff;font-size:8px;cursor:pointer;margin:10px auto;display:block;box-shadow:3px 3px 0 #000;}
+#fish-modal .modal-box{min-width:290px;text-align:center;}
+#cast-btn{font-family:'Press Start 2P',monospace;padding:8px 18px;border:3px solid #1a5a9a;background:#0a2a5a;color:#88ccff;font-size:7px;cursor:pointer;margin:8px auto;display:block;box-shadow:3px 3px 0 #000;}
 #cast-btn:hover{background:#1a4a8a;}
-#fish-meter-wrap{height:16px;background:#1a0a00;border:2px solid #4a2a10;margin:8px 0;display:none;}
-#fish-meter{height:100%;width:0%;background:repeating-linear-gradient(90deg,#44aaff 0,#44aaff 4px,#2288dd 4px,#2288dd 8px);transition:width .1s;}
-#fish-result{font-family:'Press Start 2P',monospace;font-size:16px;margin:6px 0;}
-#fish-msg{font-family:'Press Start 2P',monospace;font-size:7px;color:#aa9944;line-height:1.8;}
+#fish-meter-wrap{height:14px;background:#1a0a00;border:2px solid #4a2a10;margin:6px 0;display:none;}
+#fish-meter{height:100%;width:0%;background:repeating-linear-gradient(90deg,#44aaff 0,#44aaff 4px,#2288dd 4px,#2288dd 8px);}
+#fish-result{font-size:18px;margin:5px 0;}
+#fish-msg{font-size:7px;color:#aa9944;line-height:1.8;}
+
+/* Slots */
+#slots-modal .modal-box{min-width:310px;text-align:center;}
+#slots-display{display:flex;justify-content:center;gap:8px;margin:10px 0;}
+.slot-reel{width:56px;height:56px;background:#0a0a0a;border:3px solid #4a2a10;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:inset 2px 2px 0 #000;}
+.slot-reel.spinning{animation:slot-spin .1s steps(1) infinite;}
+@keyframes slot-spin{0%{content:'🍒';}33%{content:'7️⃣';}66%{content:'💎';}}
+#slots-result{font-size:8px;color:#ffcc44;margin:6px 0;min-height:18px;text-shadow:1px 1px 0 #000;}
+#slots-bet-row{display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0;}
+#slots-bet{font-size:7px;color:#ffdd88;}
+.bet-btn{font-family:'Press Start 2P',monospace;font-size:7px;padding:4px 7px;border:2px solid #8b6914;background:#1a0a00;color:#ffcc44;cursor:pointer;}
+.bet-btn:hover{background:#3a2010;}
+#spin-btn{font-family:'Press Start 2P',monospace;padding:8px 16px;border:3px solid #ffcc44;background:#3a2a00;color:#ffee44;font-size:8px;cursor:pointer;box-shadow:3px 3px 0 #000;margin-top:4px;}
+#spin-btn:hover{background:#5a4a00;}
+
+/* Poker */
+#poker-modal .modal-box{min-width:360px;}
+#poker-table{background:#1a4a1a;border:3px solid #2a6a2a;padding:10px;border-radius:4px;margin:8px 0;}
+#poker-community{display:flex;gap:6px;justify-content:center;margin-bottom:8px;min-height:52px;align-items:center;}
+.card{width:36px;height:50px;background:#fff;border:2px solid #000;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:13px;font-family:Arial,sans-serif;color:#000;box-shadow:2px 2px 0 #000;flex-shrink:0;}
+.card.red{color:#cc0000;}
+.card.back{background:repeating-linear-gradient(45deg,#1a1a8a,#1a1a8a 4px,#2a2aaa 4px,#2a2aaa 8px);}
+.card.empty{background:#0a2a0a;border-color:#1a4a1a;}
+#poker-pot{font-size:8px;color:#ffcc44;text-align:center;margin-bottom:6px;text-shadow:1px 1px 0 #000;}
+#poker-players-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:8px;}
+.poker-player-chip{font-size:6px;padding:4px 7px;border:2px solid #4a2a10;background:#1a0a00;color:#ffdd88;}
+.poker-player-chip.active{border-color:#ffcc44;color:#ffcc44;}
+.poker-player-chip.folded{opacity:.4;}
+#my-hand{display:flex;gap:6px;justify-content:center;margin:8px 0;}
+#poker-actions{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:6px;}
+#poker-status{font-size:7px;color:#aaffaa;text-align:center;margin:4px 0;text-shadow:1px 1px 0 #000;}
+#poker-join-btn{font-family:'Press Start 2P',monospace;padding:9px 14px;border:3px solid #ffcc44;background:#3a2a00;color:#ffee44;font-size:8px;cursor:pointer;box-shadow:3px 3px 0 #000;margin:6px auto;display:block;}
+#poker-join-btn:hover{background:#5a4a00;}
+
+/* Leaderboard */
+#lb-modal .modal-box{min-width:340px;}
+#lb-tabs{display:flex;gap:4px;margin-bottom:8px;}
+.lb-tab{font-family:'Press Start 2P',monospace;padding:4px 8px;border:2px solid #4a2a10;background:transparent;color:#aa8833;font-size:6px;cursor:pointer;}
+.lb-tab.active{background:#3a5a1a;color:#aaffaa;border-color:#6a8a3a;}
+.lb-table{width:100%;border-collapse:collapse;}
+.lb-table th{font-size:6px;color:#8b6914;padding:4px 6px;border-bottom:2px solid #4a2a10;text-align:left;}
+.lb-table td{font-size:6px;color:#ffdd88;padding:4px 6px;border-bottom:1px solid #2a1a08;}
+.lb-table tr:first-child td{color:#ffee44;}
+.lb-rank{color:#888;margin-right:4px;}
+
+/* Stats panel */
+#stats-modal .modal-box{min-width:280px;}
+.stat-row{display:flex;justify-content:space-between;padding:5px 4px;border-bottom:1px solid #2a1a08;}
+.stat-label{font-size:6px;color:#aa8833;}
+.stat-val{font-size:6px;color:#ffdd88;}
+
+/* Shop */
+#shop-modal .modal-box{min-width:320px;}
+.hat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px;}
+.hat-item{background:#1a0a00;border:2px solid #4a2a10;padding:8px;text-align:center;cursor:pointer;}
+.hat-item:hover{border-color:#8b6914;}
+.hat-item.owned{border-color:#4a8a4a;}
+.hat-emoji{font-size:24px;display:block;margin-bottom:4px;}
+.hat-name{font-size:6px;color:#ffdd88;margin-bottom:3px;}
+.hat-price{font-size:6px;color:#ffcc44;}
+.hat-equip{font-family:'Press Start 2P',monospace;font-size:5px;padding:3px 5px;border:2px solid #4a8a4a;background:transparent;color:#aaffaa;cursor:pointer;margin-top:3px;display:none;}
+.hat-item.owned .hat-equip{display:block;}
+.hat-item.owned .hat-price{display:none;}
+
+/* TV/Movie */
+#tv-modal .modal-box{min-width:400px;}
+#tv-frame{width:100%;height:200px;background:#000;border:3px solid #333;margin:8px 0;display:flex;align-items:center;justify-content:center;}
+#tv-frame iframe{width:100%;height:100%;border:none;}
+#tv-placeholder{font-size:8px;color:#444;text-align:center;}
 
 /* Basement */
-#basement-modal .modal-box{min-width:320px;}
-.basement-scene{background:#0d0505;border:3px solid #3a1a08;padding:14px;text-align:center;margin-bottom:8px;}
-.basement-scene p{font-family:'Press Start 2P',monospace;font-size:7px;color:#887755;line-height:2.2;}
-
-/* Now playing ticker */
-#now-playing{position:absolute;bottom:64%;left:2%;font-family:'Press Start 2P',monospace;font-size:7px;color:#44ccff;background:#0a1a2a;border:2px solid #1a5a9a;padding:3px 8px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none;box-shadow:2px 2px 0 #000;}
+#basement-modal .modal-box{min-width:300px;}
+.basement-scene{background:#0d0505;border:3px solid #3a1a08;padding:12px;text-align:center;margin-bottom:7px;}
+.basement-scene p{font-size:7px;color:#887755;line-height:2.4;}
 
 @media(max-width:700px){#sidebar{display:none;}}
 </style>
@@ -223,77 +276,81 @@ body{background:#1a0a00;display:flex;align-items:center;justify-content:center;m
 <body>
 <div id="wrapper">
 
-<!-- OSRS Sidebar -->
+<!-- Sidebar -->
 <div id="sidebar">
   <div id="sb-header">
-    <h2>LAKE HOUSE</h2>
-    <p id="sb-count">0 online</p>
+    <h2>🏡 LAKE HOUSE</h2>
+    <div id="sb-bucks">💰 <span id="my-bucks">100</span> Lake Bucks</div>
   </div>
-  <div id="online-list">
-    <div class="sb-section">— PLAYERS ONLINE —</div>
+  <div id="online-list"><div class="sb-section">— PLAYERS ONLINE —</div></div>
+  <div id="sb-footer">
+    <button class="sb-btn" id="lb-open-btn">🏆 LEADERBOARD</button>
+    <button class="sb-btn" id="stats-open-btn">📊 MY STATS</button>
+    <button class="sb-btn" id="shop-open-btn">🛒 HAT SHOP</button>
   </div>
-  <div id="sb-footer">mudpanther.github.io/lakehouse-</div>
 </div>
 
 <!-- Main -->
 <div id="main">
 <div id="game-canvas">
 
+<!-- Night overlay -->
+<div id="night-overlay"></div>
+<div id="weather-overlay"></div>
+
 <!-- Scene -->
 <div class="px-sky">
   <div class="px-sky-1"></div><div class="px-sky-2"></div><div class="px-sky-3"></div><div class="px-sky-4"></div>
-  <div class="px-sun"></div>
-  <!-- pixel clouds -->
-  <div style="position:absolute;top:18px;left:80px;width:64px;height:16px;background:#ccdaff;box-shadow:8px -8px 0 #ccdaff,-8px -8px 0 #ccdaff,8px 0 0 #ccdaff,-8px 0 0 #ccdaff,16px 0 0 #ccdaff,-16px 0 0 #ccdaff,0 8px 0 #ccdaff,8px 8px 0 #ccdaff,-8px 8px 0 #ccdaff;"></div>
-  <div style="position:absolute;top:22px;left:260px;width:80px;height:16px;background:#ccdaff;box-shadow:8px -8px 0 #ccdaff,-8px -8px 0 #ccdaff,8px 0 0 #ccdaff,-8px 0 0 #ccdaff,16px 0 0 #ccdaff,-16px 0 0 #ccdaff,24px 0 0 #ccdaff,0 8px 0 #ccdaff,8px 8px 0 #ccdaff,-8px 8px 0 #ccdaff;"></div>
-  <div style="position:absolute;top:14px;left:500px;width:56px;height:16px;background:#ccdaff;box-shadow:8px -8px 0 #ccdaff,-8px -8px 0 #ccdaff,8px 0 0 #ccdaff,-8px 0 0 #ccdaff,16px 0 0 #ccdaff,0 8px 0 #ccdaff,8px 8px 0 #ccdaff;"></div>
-  <div style="position:absolute;top:28px;left:700px;width:72px;height:16px;background:#ccdaff;box-shadow:8px -8px 0 #ccdaff,-8px -8px 0 #ccdaff,8px 0 0 #ccdaff,-8px 0 0 #ccdaff,16px 0 0 #ccdaff,-16px 0 0 #ccdaff,0 8px 0 #ccdaff,8px 8px 0 #ccdaff;"></div>
+  <div class="px-sun" id="px-sun"></div>
+  <div class="px-moon" id="px-moon"></div>
+  <div style="position:absolute;top:18px;left:80px;width:64px;height:16px;background:#ccdaff;box-shadow:8px -8px 0 #ccdaff,-8px -8px 0 #ccdaff,8px 0 0 #ccdaff,-8px 0 0 #ccdaff,16px 0 0 #ccdaff,-16px 0 0 #ccdaff,0 8px 0 #ccdaff,8px 8px 0 #ccdaff,-8px 8px 0 #ccdaff;" id="cloud1"></div>
+  <div style="position:absolute;top:22px;left:280px;width:80px;height:16px;background:#ccdaff;box-shadow:8px -8px 0 #ccdaff,-8px -8px 0 #ccdaff,8px 0 0 #ccdaff,-8px 0 0 #ccdaff,16px 0 0 #ccdaff,-16px 0 0 #ccdaff,24px 0 0 #ccdaff,0 8px 0 #ccdaff,8px 8px 0 #ccdaff;" id="cloud2"></div>
+  <div style="position:absolute;top:14px;left:520px;width:56px;height:16px;background:#ccdaff;box-shadow:8px -8px 0 #ccdaff,-8px -8px 0 #ccdaff,8px 0 0 #ccdaff,-8px 0 0 #ccdaff,16px 0 0 #ccdaff,0 8px 0 #ccdaff,8px 8px 0 #ccdaff;" id="cloud3"></div>
 </div>
 <div id="px-trees"></div>
 <div class="px-ground"><div class="px-ground-top"></div><div class="px-ground-body"></div></div>
-<div class="px-lake">
-  <div class="px-lake-body"></div>
-  <div class="px-lake-edge"></div>
-  <div class="px-lake-shine"></div>
-  <div class="px-lake-shine2"></div>
-</div>
+<div class="px-lake"><div class="px-lake-body"></div><div class="px-lake-edge"></div><div class="px-lake-shine"></div><div class="px-lake-shine2"></div></div>
 <div class="px-dock-post" style="left:46%;height:26px;"></div>
 <div class="px-dock-post" style="left:52%;height:26px;"></div>
 <div class="px-dock"><div class="px-dock-plank"></div></div>
-
-<!-- PIXEL SPRITES via SVG -->
+<div class="px-boat"><svg width="56" height="36" viewBox="0 0 56 36" style="image-rendering:pixelated;display:block;"><rect x="2" y="20" width="52" height="12" fill="#cc2200" stroke="#000" stroke-width="2"/><rect x="2" y="20" width="52" height="4" fill="#ee3311"/><polygon points="2,20 8,32 48,32 54,20" fill="#aa1100" stroke="#000" stroke-width="1"/><rect x="26" y="4" width="3" height="18" fill="#c8a060" stroke="#000" stroke-width="1"/><polygon points="29,4 29,20 48,16" fill="#eeeedd" stroke="#000" stroke-width="1"/><rect x="0" y="30" width="56" height="2" fill="#4a9ade" opacity=".6"/></svg></div>
 
 <!-- House -->
 <div class="px-house">
   <svg width="110" height="90" viewBox="0 0 110 90" style="image-rendering:pixelated;display:block;">
-    <!-- roof -->
     <polygon points="55,2 4,44 106,44" fill="#882222" stroke="#000" stroke-width="2"/>
-    <polygon points="55,2 55,14 100,44 106,44" fill="#aa3333" stroke="none"/>
-    <!-- chimney -->
+    <polygon points="55,2 55,14 100,44 106,44" fill="#aa3333"/>
     <rect x="72" y="8" width="10" height="20" fill="#664444" stroke="#000" stroke-width="1"/>
     <rect x="70" y="6" width="14" height="4" fill="#886666" stroke="#000" stroke-width="1"/>
-    <!-- body -->
     <rect x="4" y="42" width="102" height="46" fill="#c8a060" stroke="#000" stroke-width="2"/>
-    <rect x="4" y="42" width="102" height="6" fill="#dab870" stroke="none"/>
-    <!-- door -->
+    <rect x="4" y="42" width="102" height="6" fill="#dab870"/>
     <rect x="44" y="62" width="22" height="26" fill="#6b3a10" stroke="#000" stroke-width="2"/>
-    <rect x="44" y="62" width="22" height="4" fill="#8b5a28" stroke="none"/>
     <rect x="62" y="72" width="3" height="3" fill="#ffcc44"/>
-    <!-- windows -->
     <rect x="10" y="50" width="22" height="18" fill="#88bbdd" stroke="#000" stroke-width="2"/>
     <line x1="21" y1="50" x2="21" y2="68" stroke="#000" stroke-width="1"/>
     <line x1="10" y1="59" x2="32" y2="59" stroke="#000" stroke-width="1"/>
     <rect x="78" y="50" width="22" height="18" fill="#88bbdd" stroke="#000" stroke-width="2"/>
     <line x1="89" y1="50" x2="89" y2="68" stroke="#000" stroke-width="1"/>
     <line x1="78" y1="59" x2="100" y2="59" stroke="#000" stroke-width="1"/>
-    <!-- smoke puffs -->
-    <circle cx="77" cy="4" r="3" fill="#aaaaaa" opacity=".6"/>
-    <circle cx="80" cy="1" r="2" fill="#cccccc" opacity=".4"/>
+    <circle cx="77" cy="4" r="3" fill="#aaa" opacity=".6"/>
+    <circle cx="80" cy="1" r="2" fill="#ccc" opacity=".4"/>
   </svg>
   <div class="scene-tag">LAKE HOUSE</div>
 </div>
 
-<!-- Secret basement door -->
+<!-- TV inside house -->
+<div class="px-tv" id="tv-trigger" style="cursor:pointer;">
+  <svg width="32" height="26" viewBox="0 0 32 26" style="image-rendering:pixelated;display:block;">
+    <rect x="0" y="0" width="32" height="22" fill="#222" stroke="#444" stroke-width="2"/>
+    <rect x="3" y="3" width="26" height="14" fill="#1a1a4a"/>
+    <rect x="8" y="17" width="16" height="2" fill="#333"/>
+    <rect x="14" y="19" width="4" height="7" fill="#333"/>
+    <rect x="10" y="24" width="12" height="2" fill="#444"/>
+  </svg>
+  <div class="scene-tag">TV ROOM</div>
+</div>
+
+<!-- Basement -->
 <div class="px-basement" id="basement-trigger" title="...">
   <svg width="16" height="22" viewBox="0 0 16 22" style="image-rendering:pixelated;display:block;cursor:pointer;">
     <rect x="0" y="0" width="16" height="22" fill="#2a1408" stroke="#4a2a10" stroke-width="2"/>
@@ -305,28 +362,20 @@ body{background:#1a0a00;display:flex;align-items:center;justify-content:center;m
 <!-- DJ Booth -->
 <div class="px-dj">
   <svg width="72" height="54" viewBox="0 0 72 54" style="image-rendering:pixelated;display:block;cursor:pointer;" id="dj-trigger">
-    <!-- table body -->
     <rect x="0" y="20" width="72" height="32" fill="#111" stroke="#333" stroke-width="2"/>
-    <rect x="0" y="20" width="72" height="5" fill="#222" stroke="none"/>
-    <!-- table legs -->
+    <rect x="0" y="20" width="72" height="5" fill="#222"/>
     <rect x="4" y="50" width="6" height="4" fill="#0a0a0a" stroke="#222" stroke-width="1"/>
     <rect x="62" y="50" width="6" height="4" fill="#0a0a0a" stroke="#222" stroke-width="1"/>
-    <!-- deck left -->
     <rect x="5" y="24" width="26" height="22" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
     <circle cx="18" cy="35" r="9" fill="#0a0a0a" stroke="#cc2200" stroke-width="3"/>
     <circle cx="18" cy="35" r="3" fill="#222" stroke="#cc2200" stroke-width="1"/>
-    <circle cx="18" cy="28" r="1" fill="#cc2200"/>
-    <!-- deck right -->
     <rect x="41" y="24" width="26" height="22" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
     <circle cx="54" cy="35" r="9" fill="#0a0a0a" stroke="#0088cc" stroke-width="3"/>
     <circle cx="54" cy="35" r="3" fill="#222" stroke="#0088cc" stroke-width="1"/>
-    <circle cx="54" cy="28" r="1" fill="#0088cc"/>
-    <!-- mixer center -->
     <rect x="31" y="26" width="10" height="18" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
     <rect x="33" y="28" width="6" height="2" fill="#cc4400"/>
     <rect x="33" y="32" width="6" height="2" fill="#0088cc"/>
     <rect x="33" y="36" width="6" height="2" fill="#44cc00"/>
-    <!-- glow -->
     <rect x="5" y="44" width="62" height="2" fill="#cc2200" opacity=".4"/>
   </svg>
   <div class="scene-tag">DJ BOOTH</div>
@@ -336,148 +385,141 @@ body{background:#1a0a00;display:flex;align-items:center;justify-content:center;m
 <!-- Bar -->
 <div class="px-bar">
   <svg width="88" height="52" viewBox="0 0 88 52" style="image-rendering:pixelated;display:block;cursor:pointer;" id="bar-trigger">
-    <!-- counter top -->
     <rect x="0" y="18" width="88" height="6" fill="#7a4010" stroke="#000" stroke-width="2"/>
-    <rect x="0" y="18" width="88" height="3" fill="#9a5a20" stroke="none"/>
-    <!-- counter body -->
+    <rect x="0" y="18" width="88" height="3" fill="#9a5a20"/>
     <rect x="0" y="24" width="88" height="28" fill="#5a2a08" stroke="#000" stroke-width="2"/>
-    <!-- shelf behind -->
     <rect x="4" y="4" width="80" height="3" fill="#6b3a10" stroke="#000" stroke-width="1"/>
-    <!-- bottles row -->
     <rect x="8" y="5" width="6" height="14" fill="#2a6a2a" stroke="#000" stroke-width="1"/>
-    <rect x="9" y="3" width="4" height="4" fill="#1a4a1a" stroke="#000" stroke-width="1"/>
     <rect x="18" y="7" width="6" height="12" fill="#8a2a10" stroke="#000" stroke-width="1"/>
-    <rect x="19" y="5" width="4" height="4" fill="#6a1a08" stroke="#000" stroke-width="1"/>
     <rect x="28" y="4" width="6" height="15" fill="#2a2a8a" stroke="#000" stroke-width="1"/>
-    <rect x="29" y="2" width="4" height="4" fill="#1a1a6a" stroke="#000" stroke-width="1"/>
     <rect x="38" y="6" width="6" height="13" fill="#7a2a7a" stroke="#000" stroke-width="1"/>
-    <rect x="39" y="4" width="4" height="4" fill="#5a1a5a" stroke="#000" stroke-width="1"/>
     <rect x="48" y="5" width="6" height="14" fill="#8a7a10" stroke="#000" stroke-width="1"/>
-    <rect x="49" y="3" width="4" height="4" fill="#6a5a08" stroke="#000" stroke-width="1"/>
     <rect x="58" y="7" width="6" height="12" fill="#1a6a6a" stroke="#000" stroke-width="1"/>
-    <rect x="59" y="5" width="4" height="4" fill="#0a4a4a" stroke="#000" stroke-width="1"/>
     <rect x="68" y="4" width="6" height="15" fill="#6a4a10" stroke="#000" stroke-width="1"/>
-    <rect x="69" y="2" width="4" height="4" fill="#4a2a08" stroke="#000" stroke-width="1"/>
-    <!-- bar stools -->
     <rect x="10" y="46" width="8" height="4" fill="#3a1a04" stroke="#000" stroke-width="1"/>
-    <rect x="13" y="40" width="2" height="6" fill="#2a1004" stroke="#000" stroke-width="1"/>
+    <rect x="13" y="40" width="2" height="6" fill="#2a1004"/>
     <rect x="30" y="46" width="8" height="4" fill="#3a1a04" stroke="#000" stroke-width="1"/>
-    <rect x="33" y="40" width="2" height="6" fill="#2a1004" stroke="#000" stroke-width="1"/>
+    <rect x="33" y="40" width="2" height="6" fill="#2a1004"/>
     <rect x="50" y="46" width="8" height="4" fill="#3a1a04" stroke="#000" stroke-width="1"/>
-    <rect x="53" y="40" width="2" height="6" fill="#2a1004" stroke="#000" stroke-width="1"/>
+    <rect x="53" y="40" width="2" height="6" fill="#2a1004"/>
     <rect x="70" y="46" width="8" height="4" fill="#3a1a04" stroke="#000" stroke-width="1"/>
-    <rect x="73" y="40" width="2" height="6" fill="#2a1004" stroke="#000" stroke-width="1"/>
+    <rect x="73" y="40" width="2" height="6" fill="#2a1004"/>
   </svg>
   <div class="scene-tag">BAR</div>
 </div>
 
 <!-- Game Table -->
 <div class="px-gametable">
-  <svg width="60" height="52" viewBox="0 0 60 52" style="image-rendering:pixelated;display:block;cursor:pointer;" id="game-trigger">
-    <!-- table top with chess pattern -->
-    <rect x="0" y="0" width="60" height="44" fill="#8a5a1a" stroke="#000" stroke-width="2"/>
-    <rect x="4" y="4" width="52" height="36" fill="#e8c870" stroke="#000" stroke-width="1"/>
-    <!-- chess squares -->
-    <rect x="4" y="4" width="7" height="7" fill="#8a4a10"/>
-    <rect x="18" y="4" width="7" height="7" fill="#8a4a10"/>
-    <rect x="32" y="4" width="7" height="7" fill="#8a4a10"/>
-    <rect x="46" y="4" width="7" height="7" fill="#8a4a10"/>
-    <rect x="11" y="11" width="7" height="7" fill="#8a4a10"/>
-    <rect x="25" y="11" width="7" height="7" fill="#8a4a10"/>
+  <svg width="56" height="48" viewBox="0 0 56 48" style="image-rendering:pixelated;display:block;cursor:pointer;" id="game-trigger">
+    <rect x="0" y="0" width="56" height="40" fill="#8a5a1a" stroke="#000" stroke-width="2"/>
+    <rect x="4" y="4" width="48" height="32" fill="#e8c870" stroke="#000" stroke-width="1"/>
+    <rect x="4" y="4" width="7" height="7" fill="#8a4a10"/><rect x="18" y="4" width="7" height="7" fill="#8a4a10"/>
+    <rect x="32" y="4" width="7" height="7" fill="#8a4a10"/><rect x="46" y="4" width="7" height="7" fill="#8a4a10"/>
+    <rect x="11" y="11" width="7" height="7" fill="#8a4a10"/><rect x="25" y="11" width="7" height="7" fill="#8a4a10"/>
     <rect x="39" y="11" width="7" height="7" fill="#8a4a10"/>
-    <rect x="4" y="18" width="7" height="7" fill="#8a4a10"/>
-    <rect x="18" y="18" width="7" height="7" fill="#8a4a10"/>
-    <rect x="32" y="18" width="7" height="7" fill="#8a4a10"/>
-    <rect x="46" y="18" width="7" height="7" fill="#8a4a10"/>
-    <rect x="11" y="25" width="7" height="7" fill="#8a4a10"/>
-    <rect x="25" y="25" width="7" height="7" fill="#8a4a10"/>
-    <rect x="39" y="25" width="7" height="7" fill="#8a4a10"/>
-    <rect x="4" y="32" width="7" height="7" fill="#8a4a10"/>
-    <rect x="18" y="32" width="7" height="7" fill="#8a4a10"/>
-    <rect x="32" y="32" width="7" height="7" fill="#8a4a10"/>
-    <rect x="46" y="32" width="7" height="7" fill="#8a4a10"/>
-    <!-- pieces -->
-    <circle cx="11" cy="11" r="4" fill="#eee" stroke="#000" stroke-width="1"/>
-    <circle cx="25" cy="11" r="4" fill="#eee" stroke="#000" stroke-width="1"/>
-    <circle cx="11" cy="33" r="4" fill="#111" stroke="#555" stroke-width="1"/>
-    <circle cx="25" cy="33" r="4" fill="#111" stroke="#555" stroke-width="1"/>
-    <!-- legs -->
-    <rect x="4" y="42" width="6" height="10" fill="#6a3a08" stroke="#000" stroke-width="1"/>
-    <rect x="50" y="42" width="6" height="10" fill="#6a3a08" stroke="#000" stroke-width="1"/>
+    <rect x="4" y="18" width="7" height="7" fill="#8a4a10"/><rect x="18" y="18" width="7" height="7" fill="#8a4a10"/>
+    <rect x="32" y="18" width="7" height="7" fill="#8a4a10"/><rect x="46" y="18" width="7" height="7" fill="#8a4a10"/>
+    <rect x="4" y="42" width="6" height="6" fill="#6a3a08" stroke="#000" stroke-width="1"/>
+    <rect x="46" y="42" width="6" height="6" fill="#6a3a08" stroke="#000" stroke-width="1"/>
   </svg>
   <div class="scene-tag">GAMES</div>
+</div>
+
+<!-- Slots Machine -->
+<div class="px-slots" id="slots-trigger" style="cursor:pointer;">
+  <svg width="52" height="64" viewBox="0 0 52 64" style="image-rendering:pixelated;display:block;">
+    <rect x="0" y="0" width="52" height="60" fill="#880000" stroke="#000" stroke-width="2"/>
+    <rect x="0" y="0" width="52" height="6" fill="#aa2222"/>
+    <rect x="4" y="8" width="44" height="28" fill="#111" stroke="#333" stroke-width="1"/>
+    <rect x="6" y="10" width="12" height="24" fill="#0a0a0a" stroke="#444" stroke-width="1"/>
+    <rect x="20" y="10" width="12" height="24" fill="#0a0a0a" stroke="#444" stroke-width="1"/>
+    <rect x="34" y="10" width="12" height="24" fill="#0a0a0a" stroke="#444" stroke-width="1"/>
+    <rect x="6" y="20" width="40" height="4" fill="#ffee00" opacity=".15"/>
+    <rect x="14" y="40" width="24" height="10" fill="#ffee00" stroke="#000" stroke-width="1"/>
+    <rect x="16" y="42" width="20" height="6" fill="#ffcc00"/>
+    <rect x="44" y="20" width="6" height="20" fill="#cc1111" stroke="#000" stroke-width="1" rx="2"/>
+    <rect x="45" y="18" width="4" height="6" fill="#ee2222"/>
+    <rect x="4" y="52" width="44" height="6" fill="#660000"/>
+    <rect x="10" y="54" width="8" height="2" fill="#ffcc44" opacity=".5"/>
+    <rect x="22" y="54" width="8" height="2" fill="#ffcc44" opacity=".5"/>
+    <rect x="34" y="54" width="8" height="2" fill="#ffcc44" opacity=".5"/>
+  </svg>
+  <div class="scene-tag">SLOTS</div>
+</div>
+
+<!-- Poker Table -->
+<div class="px-poker" id="poker-trigger" style="cursor:pointer;">
+  <svg width="68" height="42" viewBox="0 0 68 42" style="image-rendering:pixelated;display:block;">
+    <ellipse cx="34" cy="21" rx="32" ry="18" fill="#1a5a1a" stroke="#000" stroke-width="2"/>
+    <ellipse cx="34" cy="21" rx="26" ry="13" fill="#2a7a2a" stroke="#1a4a1a" stroke-width="1"/>
+    <rect x="16" y="19" width="8" height="5" fill="#cc2200" stroke="#000" stroke-width="1"/>
+    <rect x="28" y="19" width="8" height="5" fill="#000" stroke="#555" stroke-width="1"/>
+    <rect x="40" y="19" width="8" height="5" fill="#cc2200" stroke="#000" stroke-width="1"/>
+    <circle cx="34" cy="21" r="4" fill="#ffcc44" stroke="#aa8800" stroke-width="1"/>
+    <rect x="0" y="38" width="68" height="4" fill="#8a5a1a" stroke="#000" stroke-width="1"/>
+  </svg>
+  <div class="scene-tag">POKER</div>
 </div>
 
 <!-- Campfire -->
 <div class="px-campfire">
   <svg width="40" height="38" viewBox="0 0 40 38" style="image-rendering:pixelated;display:block;">
-    <!-- logs -->
     <rect x="4" y="28" width="32" height="6" fill="#6b3a10" stroke="#000" stroke-width="1" transform="rotate(-15 20 31)"/>
     <rect x="4" y="28" width="32" height="6" fill="#5a2a08" stroke="#000" stroke-width="1" transform="rotate(15 20 31)"/>
     <rect x="14" y="30" width="12" height="6" fill="#8b5a28" stroke="#000" stroke-width="1"/>
-    <!-- fire layers - pixel style -->
     <rect x="15" y="18" width="10" height="14" fill="#cc2200"/>
     <rect x="13" y="20" width="14" height="10" fill="#cc2200"/>
     <rect x="17" y="10" width="6" height="12" fill="#ee4400"/>
     <rect x="15" y="14" width="10" height="8" fill="#ee4400"/>
     <rect x="18" y="6" width="4" height="8" fill="#ffaa00"/>
-    <rect x="17" y="10" width="6" height="6" fill="#ffaa00"/>
     <rect x="19" y="2" width="2" height="6" fill="#ffee44"/>
-    <!-- embers -->
     <rect x="8" y="26" width="2" height="2" fill="#ff6600" opacity=".8"/>
     <rect x="30" y="24" width="2" height="2" fill="#ff6600" opacity=".6"/>
-    <rect x="12" y="22" width="2" height="2" fill="#ffaa00" opacity=".5"/>
   </svg>
   <div class="scene-tag">FIRE PIT</div>
 </div>
 
-<!-- Fishing spot -->
+<!-- Fishing -->
 <div class="px-fishing" id="fish-trigger">
   <svg width="38" height="54" viewBox="0 0 38 54" style="image-rendering:pixelated;display:block;">
-    <!-- rod -->
     <rect x="18" y="2" width="3" height="36" fill="#8b5a28" stroke="#000" stroke-width="1" transform="rotate(12 20 20)"/>
-    <!-- line -->
-    <line x1="24" y1="6" x2="30" y2="38" stroke="#cccccc" stroke-width="1"/>
-    <!-- bobber -->
+    <line x1="24" y1="6" x2="30" y2="38" stroke="#ccc" stroke-width="1"/>
     <rect x="27" y="36" width="6" height="4" fill="#cc2200" stroke="#000" stroke-width="1"/>
-    <rect x="27" y="36" width="6" height="2" fill="#ffffff" stroke="none"/>
-    <!-- fish hint underwater -->
+    <rect x="27" y="36" width="6" height="2" fill="#fff"/>
     <ellipse cx="22" cy="50" rx="6" ry="3" fill="#2277aa" opacity=".5"/>
     <polygon points="28,50 34,47 34,53" fill="#2277aa" opacity=".5"/>
   </svg>
   <div class="scene-tag">FISHING</div>
 </div>
 
-<!-- Boat -->
-<div class="px-boat">
-  <svg width="56" height="36" viewBox="0 0 56 36" style="image-rendering:pixelated;display:block;">
-    <rect x="2" y="20" width="52" height="12" fill="#cc2200" stroke="#000" stroke-width="2"/>
-    <rect x="2" y="20" width="52" height="4" fill="#ee3311" stroke="none"/>
-    <polygon points="2,20 8,32 48,32 54,20" fill="#aa1100" stroke="#000" stroke-width="1"/>
-    <!-- mast -->
-    <rect x="26" y="4" width="3" height="18" fill="#c8a060" stroke="#000" stroke-width="1"/>
-    <!-- sail -->
-    <polygon points="29,4 29,20 48,16" fill="#eeeedd" stroke="#000" stroke-width="1"/>
-    <!-- water line -->
-    <rect x="0" y="30" width="56" height="2" fill="#4a9ade" opacity=".6"/>
-  </svg>
-</div>
-
-<!-- Players layer -->
+<!-- Players -->
 <div id="players-layer"></div>
 <div id="zone-label"></div>
+<div id="announcement"></div>
 
 <!-- HUD -->
 <div id="hud">
   <div class="hud-pill" id="player-count">0 ONLINE</div>
   <div class="hud-pill" id="status-dot">CONNECTING...</div>
+  <div class="hud-pill" id="time-pill">☀️ DAY</div>
+  <div class="hud-pill" id="weather-pill">🌤️ CLEAR</div>
+</div>
+
+<!-- Reactions -->
+<div id="reactions-bar">
+  <div class="react-btn" data-react="👋">👋</div>
+  <div class="react-btn" data-react="😂">😂</div>
+  <div class="react-btn" data-react="🔥">🔥</div>
+  <div class="react-btn" data-react="💯">💯</div>
+  <div class="react-btn" data-react="💀">💀</div>
+  <div class="react-btn" data-react="🎉">🎉</div>
 </div>
 
 <!-- Chat -->
 <div id="chat-panel">
   <div id="chat-messages"></div>
   <div id="chat-input-row">
-    <input id="chat-input" type="text" placeholder="Talk here..." maxlength="100"/>
+    <input id="chat-input" type="text" placeholder="Talk or /roll /me..." maxlength="100"/>
     <button id="chat-send">SAY</button>
   </div>
 </div>
@@ -505,6 +547,7 @@ body{background:#1a0a00;display:flex;align-items:center;justify-content:center;m
   <button class="act-btn" data-activity="vibing by the fire 🔥">🔥 CAMPFIRE</button>
   <button class="act-btn" data-activity="chilling inside 🏡">🏡 INSIDE</button>
   <button class="act-btn" data-activity="out on the boat ⛵">⛵ BOAT RIDE</button>
+  <button class="act-btn" data-activity="playing poker ♠️">♠️ POKER</button>
   <button class="act-clear" id="clear-activity">[ CLEAR ACTIVITY ]</button>
 </div>
 
@@ -525,8 +568,8 @@ body{background:#1a0a00;display:flex;align-items:center;justify-content:center;m
   <div class="modal-box">
     <button class="modal-close" data-close="dj-modal">X</button>
     <h3>🎧 DJ BOOTH</h3>
-    <input id="dj-input" type="text" placeholder="Song name or YouTube URL..."/>
-    <button id="dj-submit">>> PLAY FOR EVERYONE</button>
+    <input id="dj-input" class="px-input" type="text" placeholder="Song name or YouTube URL..."/>
+    <button id="dj-submit" class="px-btn">>> PLAY FOR EVERYONE</button>
     <div id="dj-nowplaying"></div>
   </div>
 </div>
@@ -536,7 +579,7 @@ body{background:#1a0a00;display:flex;align-items:center;justify-content:center;m
   <div class="modal-box">
     <button class="modal-close" data-close="bar-modal">X</button>
     <h3>🍺 THE BAR</h3>
-    <p style="font-family:'Press Start 2P',monospace;font-size:6px;color:#aa8833;margin-bottom:8px;">What are you having?</p>
+    <p style="font-size:6px;color:#aa8833;margin-bottom:6px;">What are you having?</p>
     <div class="drink-grid">
       <button class="drink-btn" data-drink="sipping a beer 🍺">🍺 Beer</button>
       <button class="drink-btn" data-drink="drinking wine 🍷">🍷 Wine</button>
@@ -571,11 +614,95 @@ body{background:#1a0a00;display:flex;align-items:center;justify-content:center;m
   <div class="modal-box">
     <button class="modal-close" data-close="fish-modal">X</button>
     <h3>🎣 FISHING HOLE</h3>
-    <p style="font-family:'Press Start 2P',monospace;font-size:6px;color:#aa8833;margin-bottom:6px;line-height:2;">Cast your line. Wait for a bite.</p>
+    <p style="font-size:6px;color:#aa8833;margin-bottom:5px;line-height:2;">Cast your line. Wait for a bite.</p>
     <button id="cast-btn">🎣 CAST LINE</button>
     <div id="fish-meter-wrap"><div id="fish-meter"></div></div>
     <div id="fish-result"></div>
     <div id="fish-msg">Ready to fish.</div>
+  </div>
+</div>
+
+<!-- Slots Modal -->
+<div class="modal-overlay" id="slots-modal" style="display:none;">
+  <div class="modal-box">
+    <button class="modal-close" data-close="slots-modal">X</button>
+    <h3>🎰 SLOT MACHINE</h3>
+    <div id="slots-display">
+      <div class="slot-reel" id="reel1">🍒</div>
+      <div class="slot-reel" id="reel2">🍒</div>
+      <div class="slot-reel" id="reel3">🍒</div>
+    </div>
+    <div id="slots-result"></div>
+    <div id="slots-bet-row">
+      <button class="bet-btn" id="bet-down">-</button>
+      <div id="slots-bet">BET: 10 🪙</div>
+      <button class="bet-btn" id="bet-up">+</button>
+    </div>
+    <button id="spin-btn">🎰 SPIN</button>
+    <p style="font-size:6px;color:#664422;margin-top:6px;line-height:2;">3x same = win! 💎💎💎 = JACKPOT!</p>
+  </div>
+</div>
+
+<!-- Poker Modal -->
+<div class="modal-overlay" id="poker-modal" style="display:none;">
+  <div class="modal-box">
+    <button class="modal-close" data-close="poker-modal">X</button>
+    <h3>♠️ POKER TABLE</h3>
+    <button id="poker-join-btn">>> JOIN GAME (ante: 20 🪙)</button>
+    <div id="poker-table" style="display:none;">
+      <div id="poker-pot"></div>
+      <div id="poker-community"></div>
+      <div id="poker-players-row"></div>
+      <div id="my-hand"></div>
+      <div id="poker-status"></div>
+      <div id="poker-actions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaderboard Modal -->
+<div class="modal-overlay" id="lb-modal" style="display:none;">
+  <div class="modal-box">
+    <button class="modal-close" data-close="lb-modal">X</button>
+    <h3>🏆 LEADERBOARD</h3>
+    <div id="lb-tabs">
+      <button class="lb-tab active" data-lb="bucks">BUCKS</button>
+      <button class="lb-tab" data-lb="fish">FISH</button>
+      <button class="lb-tab" data-lb="wins">WINS</button>
+      <button class="lb-tab" data-lb="time">TIME</button>
+    </div>
+    <div id="lb-content"></div>
+  </div>
+</div>
+
+<!-- Stats Modal -->
+<div class="modal-overlay" id="stats-modal" style="display:none;">
+  <div class="modal-box">
+    <button class="modal-close" data-close="stats-modal">X</button>
+    <h3>📊 MY STATS</h3>
+    <div id="stats-content"></div>
+  </div>
+</div>
+
+<!-- Shop Modal -->
+<div class="modal-overlay" id="shop-modal" style="display:none;">
+  <div class="modal-box">
+    <button class="modal-close" data-close="shop-modal">X</button>
+    <h3>🛒 HAT SHOP</h3>
+    <p style="font-size:6px;color:#aa8833;margin-bottom:6px;">You have <span id="shop-bucks">0</span> 🪙</p>
+    <div class="hat-grid" id="hat-grid"></div>
+  </div>
+</div>
+
+<!-- TV Modal -->
+<div class="modal-overlay" id="tv-modal" style="display:none;">
+  <div class="modal-box">
+    <button class="modal-close" data-close="tv-modal">X</button>
+    <h3>📺 TV ROOM</h3>
+    <div id="tv-frame"><div id="tv-placeholder">Paste a YouTube URL to watch together</div></div>
+    <input id="tv-input" class="px-input" style="margin-top:8px;" type="text" placeholder="YouTube URL..."/>
+    <button id="tv-submit" class="px-btn green" style="margin-top:4px;">>> PUT IT ON</button>
+    <p style="font-size:6px;color:#664422;margin-top:5px;">Everyone sees the same stream</p>
   </div>
 </div>
 
@@ -587,70 +714,53 @@ body{background:#1a0a00;display:flex;align-items:center;justify-content:center;m
     <div class="basement-scene">
       <p>🕯️ You found the hidden room.<br><br>Dimly lit. Old couch.<br>A lava lamp in the corner.<br><br>Someone left a half-smoked<br>blunt on the table.<br><br>The vibe is immaculate.</p>
     </div>
-    <p style="font-family:'Press Start 2P',monospace;font-size:6px;color:#443322;text-align:center;">Keep this between us 🤫</p>
+    <p style="font-size:6px;color:#443322;text-align:center;">Keep this between us 🤫</p>
   </div>
 </div>
 
-</div><!-- game-canvas -->
-</div><!-- main -->
-</div><!-- wrapper -->
-
-<style>
-@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-@keyframes fire-flicker{0%,100%{transform:scaleX(1) scaleY(1)}50%{transform:scaleX(.9) scaleY(1.1)}}
-</style>
+</div></div></div>
 
 <script>
-const WS_URL = "wss://lakehouse-production-ab5f.up.railway.app/ws";
-
+const WS_URL="wss://lakehouse-production-ab5f.up.railway.app/ws";
 const COLORS=['#e05c5c','#e07c3a','#e0c040','#4db86e','#3a9ad9','#9b59e0','#e05cb0','#5cd4d4','#ff8c42','#a8e6cf','#f06292','#80cbc4'];
-const ZONES={
-  house:   {label:'LAKE HOUSE',    x:[74,96],y:[38,65]},
-  dj:      {label:'DJ BOOTH',      x:[2,16], y:[38,65]},
-  bar:     {label:'THE BAR',       x:[18,34],y:[38,65]},
-  games:   {label:'GAME TABLE',    x:[37,53],y:[38,65]},
-  campfire:{label:'FIRE PIT',      x:[56,72],y:[42,65]},
-  dock:    {label:'THE DOCK',      x:[43,58],y:[24,37]},
-  lake:    {label:'THE LAKE',      x:[10,82],y:[6,26]},
-  fishing: {label:'FISHING HOLE',  x:[80,96],y:[24,42]},
-};
+const ZONES={house:{label:'LAKE HOUSE',x:[74,96],y:[38,65]},dj:{label:'DJ BOOTH',x:[2,16],y:[38,65]},bar:{label:'THE BAR',x:[18,34],y:[38,65]},games:{label:'GAME TABLE',x:[37,54],y:[38,65]},slots:{label:'SLOTS',x:[55,68],y:[38,65]},campfire:{label:'FIRE PIT',x:[69,80],y:[42,65]},dock:{label:'THE DOCK',x:[43,58],y:[24,37]},lake:{label:'THE LAKE',x:[10,82],y:[6,26]},fishing:{label:'FISHING',x:[80,96],y:[24,42]},poker:{label:'POKER TABLE',x:[72,88],y:[38,65]}};
+const HATS={cowboy:{emoji:'🤠',name:'Cowboy Hat',price:50},crown:{emoji:'👑',name:'Crown',price:200},santa:{emoji:'🎅',name:'Santa Hat',price:75},cap:{emoji:'🧢',name:'Cap',price:30},wizard:{emoji:'🧙',name:'Wizard Hat',price:150},party:{emoji:'🎉',name:'Party Hat',price:40}};
 
 let me=null,players={},ws=null,myBubbleTimer=null;
+let myEconomy={bucks:100,fishCaught:0,gamesWon:0,timeOnline:0,hats:[],equippedHat:null};
+let currentWeather='clear',gameTime=720,lbData={};
+let slotsBet=10,slotsSpinning=false;
+let fishing=false,fishInterval=null;
 const $=id=>document.getElementById(id);
+
+const SLOT_SYMBOLS=['🍒','🍋','🍊','⭐','💎','7️⃣','🎰'];
+const SLOT_WEIGHTS=[30,20,18,14,10,6,2];
 
 document.addEventListener('DOMContentLoaded',()=>{
 
-// ── Pixel Trees ───────────────────────────────────────────────────────────────
+// ── Trees ─────────────────────────────────────────────────────────────────────
 const tr=$('px-trees');
 const treeColors=['#1b5e20','#2e7d32','#1a4a10','#2a6a18','#0d3b0d'];
 for(let i=0;i<40;i++){
-  const h=40+Math.random()*70, w=16+Math.random()*14;
+  const h=40+Math.random()*70,w=16+Math.random()*14;
   const col=treeColors[Math.floor(Math.random()*treeColors.length)];
-  const col2=treeColors[Math.floor(Math.random()*treeColors.length)];
   const g=document.createElement('div');
   g.style.cssText=`display:inline-flex;flex-direction:column;align-items:center;margin-right:${-4+Math.random()*2}px;flex-shrink:0;image-rendering:pixelated;`;
-  // pixel tree: stacked triangles
-  g.innerHTML=`
-    <div style="width:0;height:0;border-left:${w*.4}px solid transparent;border-right:${w*.4}px solid transparent;border-bottom:${h*.3}px solid ${col};margin-bottom:-2px;"></div>
-    <div style="width:0;height:0;border-left:${w*.5}px solid transparent;border-right:${w*.5}px solid transparent;border-bottom:${h*.35}px solid ${col2};margin-bottom:-2px;"></div>
-    <div style="width:0;height:0;border-left:${w*.6}px solid transparent;border-right:${w*.6}px solid transparent;border-bottom:${h*.38}px solid ${col};"></div>
-    <div style="width:${w*.18}px;height:${h*.22}px;background:#5d3a10;border:1px solid #3a1a00;"></div>`;
+  g.innerHTML=`<div style="width:0;height:0;border-left:${w*.4}px solid transparent;border-right:${w*.4}px solid transparent;border-bottom:${h*.3}px solid ${col};margin-bottom:-2px;"></div><div style="width:0;height:0;border-left:${w*.5}px solid transparent;border-right:${w*.5}px solid transparent;border-bottom:${h*.35}px solid ${col};margin-bottom:-2px;"></div><div style="width:0;height:0;border-left:${w*.6}px solid transparent;border-right:${w*.6}px solid transparent;border-bottom:${h*.38}px solid ${col};"></div><div style="width:${w*.18}px;height:${h*.22}px;background:#5d3a10;border:1px solid #3a1a00;"></div>`;
   tr.appendChild(g);
 }
 
 // ── Color picker ──────────────────────────────────────────────────────────────
 let chosenColor=COLORS[Math.floor(Math.random()*COLORS.length)];
 COLORS.forEach(c=>{
-  const sw=document.createElement('div');
-  sw.className='cswatch'+(c===chosenColor?' sel':'');
-  sw.style.background=c;
+  const sw=document.createElement('div');sw.className='cswatch'+(c===chosenColor?' sel':'');sw.style.background=c;
   sw.onclick=()=>{chosenColor=c;document.querySelectorAll('.cswatch').forEach(s=>s.classList.remove('sel'));sw.classList.add('sel');};
   $('color-picker').appendChild(sw);
 });
 
 // ── WebSocket ─────────────────────────────────────────────────────────────────
 let bc=null;
-try{bc=new BroadcastChannel('lakehouse-v4');}catch(_){}
+try{bc=new BroadcastChannel('lakehouse-v5');}catch(_){}
 
 function connectWS(){
   try{
@@ -659,24 +769,21 @@ function connectWS(){
     ws.onmessage=e=>handleMsg(JSON.parse(e.data));
     ws.onclose=()=>{$('status-dot').textContent='○ RECONNECTING';setTimeout(connectWS,3000);};
     ws.onerror=()=>ws.close();
-  }catch(e){console.error(e);}
+  }catch(e){}
 }
-function send(msg){
-  if(ws&&ws.readyState===1)ws.send(JSON.stringify(msg));
-  try{bc&&bc.postMessage(msg);}catch(_){}
-}
+function send(msg){if(ws&&ws.readyState===1)ws.send(JSON.stringify(msg));try{bc&&bc.postMessage(msg);}catch(_){}}
 if(bc)bc.onmessage=e=>handleMsg(e.data);
 
-// ── Message handler ───────────────────────────────────────────────────────────
+// ── Messages ──────────────────────────────────────────────────────────────────
 function handleMsg(msg){
   if(msg.type==='join'||msg.type==='move'){
     const isNew=!players[msg.player.id];
     players[msg.player.id]={...players[msg.player.id],...msg.player};
-    if(msg.type==='join'&&isNew&&msg.player.id!==me?.id)addChat(null,`${msg.player.name} has entered the lake house`,true);
+    if(msg.type==='join'&&isNew&&msg.player.id!==me?.id)addChat(null,`${msg.player.name} entered the lake house`,true);
     renderPlayers();updateSidebar();
   }else if(msg.type==='leave'){
     const p=players[msg.id];
-    if(p&&msg.id!==me?.id){addChat(null,`${p.name} has left`,true);delete players[msg.id];renderPlayers();updateSidebar();}
+    if(p&&msg.id!==me?.id){addChat(null,`${p.name} left`,true);delete players[msg.id];renderPlayers();updateSidebar();}
   }else if(msg.type==='chat'){
     const p=players[msg.id];
     if(p){addChat(msg.id,msg.text);players[msg.id].bubble=msg.text;renderPlayers();
@@ -688,56 +795,68 @@ function handleMsg(msg){
   }else if(msg.type==='dj'){
     $('now-playing').style.display='block';$('now-playing').textContent='♪ '+msg.text;
     $('dj-nowplaying').textContent='Now playing: '+msg.text;
-    if(msg.id!==me?.id)addChat(null,`${players[msg.id]?.name||'someone'} is playing: ${msg.text}`,true);
+    if(msg.id!==me?.id)addChat(null,`${players[msg.id]?.name||'someone'} put on: ${msg.text}`,true);
+  }else if(msg.type==='reaction'){
+    spawnReaction(msg.id,msg.emoji);
+  }else if(msg.type==='weather'){
+    setWeather(msg.weather);
+  }else if(msg.type==='time'){
+    gameTime=msg.gameTime;updateTimeDisplay();
+  }else if(msg.type==='welcome'){
+    if(msg.economy){myEconomy={...myEconomy,...msg.economy};updateBucksDisplay();}
+    if(msg.weather)setWeather(msg.weather);
+    if(msg.gameTime!==undefined){gameTime=msg.gameTime;updateTimeDisplay();}
+    if(msg.leaderboard){lbData=msg.leaderboard;}
+  }else if(msg.type==='economy-update'){
+    myEconomy={...myEconomy,...msg.economy};updateBucksDisplay();
+  }else if(msg.type==='announcement'){
+    showAnnouncement(msg.text,msg.color);
+  }else if(msg.type==='leaderboard'){
+    lbData=msg.data;renderLeaderboard();
+  }else if(msg.type==='tv'){
+    loadTV(msg.url);
+    if(msg.id!==me?.id)addChat(null,`${players[msg.id]?.name||'someone'} put on a video`,true);
+  }else if(msg.type==='poker-hand'){
+    renderPokerHand(msg);
+  }else if(msg.type==='poker-state'){
+    renderPokerState(msg);
+  }else if(msg.type==='poker-end'){
+    renderPokerEnd(msg);
+  }else if(msg.type==='poker-waiting'){
+    $('poker-status').textContent=`Waiting for players... (${msg.count}/2)`;
+  }else if(msg.type==='poker-fold'){
+    addChat(null,`${msg.name} folded`,true);
+  }else if(msg.type==='hat-bought'){
+    if(!myEconomy.hats.includes(msg.hat))myEconomy.hats.push(msg.hat);
+    renderShop();
+  }else if(msg.type==='error'){
+    showAnnouncement(msg.msg,'#ff4444');
   }
 }
 
-// ── Pixel Avatar SVG ──────────────────────────────────────────────────────────
-function makeAvatarSVG(color){
-  const dark=shadeColor(color,-40);
-  return `<svg width="20" height="28" viewBox="0 0 20 28" style="image-rendering:pixelated;display:block;">
-    <rect x="6" y="0" width="8" height="8" fill="${color}" stroke="#000" stroke-width="1"/>
-    <rect x="5" y="1" width="2" height="2" fill="#000"/>
-    <rect x="13" y="1" width="2" height="2" fill="#000"/>
-    <rect x="6" y="5" width="8" height="2" fill="#ffccaa" opacity=".3"/>
-    <rect x="4" y="8" width="12" height="12" fill="${color}" stroke="#000" stroke-width="1"/>
-    <rect x="4" y="8" width="12" height="3" fill="${dark}"/>
-    <rect x="2" y="9" width="3" height="8" fill="${color}" stroke="#000" stroke-width="1"/>
-    <rect x="15" y="9" width="3" height="8" fill="${color}" stroke="#000" stroke-width="1"/>
-    <rect x="5" y="20" width="4" height="8" fill="${dark}" stroke="#000" stroke-width="1"/>
-    <rect x="11" y="20" width="4" height="8" fill="${dark}" stroke="#000" stroke-width="1"/>
-    <rect x="4" y="26" width="5" height="2" fill="${shadeColor(color,-60)}"/>
-    <rect x="11" y="26" width="5" height="2" fill="${shadeColor(color,-60)}"/>
-  </svg>`;
-}
-
-function shadeColor(hex,pct){
-  let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
-  r=Math.max(0,Math.min(255,r+pct));g=Math.max(0,Math.min(255,g+pct));b=Math.max(0,Math.min(255,b+pct));
-  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
-}
+// ── Avatar SVG ────────────────────────────────────────────────────────────────
+function shadeColor(hex,pct){let r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);r=Math.max(0,Math.min(255,r+pct));g=Math.max(0,Math.min(255,g+pct));b=Math.max(0,Math.min(255,b+pct));return'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');}
+function makeAvatarSVG(color){const d=shadeColor(color,-40),dd=shadeColor(color,-60);return`<svg width="20" height="28" viewBox="0 0 20 28" style="image-rendering:pixelated;display:block;"><rect x="6" y="0" width="8" height="8" fill="${color}" stroke="#000" stroke-width="1"/><rect x="5" y="1" width="2" height="2" fill="#000"/><rect x="13" y="1" width="2" height="2" fill="#000"/><rect x="4" y="8" width="12" height="12" fill="${color}" stroke="#000" stroke-width="1"/><rect x="4" y="8" width="12" height="3" fill="${d}"/><rect x="2" y="9" width="3" height="8" fill="${color}" stroke="#000" stroke-width="1"/><rect x="15" y="9" width="3" height="8" fill="${color}" stroke="#000" stroke-width="1"/><rect x="5" y="20" width="4" height="8" fill="${d}" stroke="#000" stroke-width="1"/><rect x="11" y="20" width="4" height="8" fill="${d}" stroke="#000" stroke-width="1"/><rect x="4" y="26" width="5" height="2" fill="${dd}"/><rect x="11" y="26" width="5" height="2" fill="${dd}"/></svg>`;}
 
 // ── Render players ────────────────────────────────────────────────────────────
 function renderPlayers(){
   const layer=$('players-layer');
-  const existing={};
-  layer.querySelectorAll('.player').forEach(el=>existing[el.dataset.pid]=el);
+  const existing={};layer.querySelectorAll('.player').forEach(el=>existing[el.dataset.pid]=el);
   const seen=new Set();
   Object.values(players).forEach(p=>{
-    seen.add(p.id);
-    let el=existing[p.id];
-    if(!el){
-      el=document.createElement('div');el.className='player';el.dataset.pid=p.id;
-      el.innerHTML=`<div class="player-activity" data-act style="display:none;"></div><div class="player-bubble" data-bubble style="display:none;"></div><div data-avatar></div><div class="player-name" data-name>${esc(p.name)}</div>`;
-      layer.appendChild(el);
-    }
+    seen.add(p.id);let el=existing[p.id];
+    if(!el){el=document.createElement('div');el.className='player';el.dataset.pid=p.id;
+      el.innerHTML=`<div class="player-hat" data-hat style="display:none;"></div><div class="player-activity" data-act style="display:none;"></div><div class="player-bubble" data-bubble style="display:none;"></div><div data-avatar></div><div class="player-name" data-name></div>`;
+      layer.appendChild(el);}
     el.style.left=p.x+'%';el.style.bottom=p.y+'%';
     el.querySelector('[data-avatar]').innerHTML=makeAvatarSVG(p.color);
-    el.querySelector('[data-name]').textContent=p.name;
+    el.querySelector('[data-name]').textContent=p.name+(p.id===me?.id?' ★':'');
     const bub=el.querySelector('[data-bubble]');
     if(p.bubble){bub.textContent=p.bubble;bub.style.display='block';}else bub.style.display='none';
     const act=el.querySelector('[data-act]');
-    if(p.activity){act.textContent=p.activity.split(' ').pop();act.style.display='block';act.title=p.activity;}else act.style.display='none';
+    if(p.activity){act.textContent=p.activity.split(' ').pop();act.style.display='block';}else act.style.display='none';
+    const hat=el.querySelector('[data-hat]');
+    if(p.equippedHat&&HATS[p.equippedHat]){hat.textContent=HATS[p.equippedHat].emoji;hat.style.display='block';}else hat.style.display='none';
   });
   Object.keys(existing).forEach(pid=>{if(!seen.has(pid))existing[pid].remove();});
   $('player-count').textContent=Object.keys(players).length+' ONLINE';
@@ -750,35 +869,94 @@ function updateSidebar(){
   Object.values(players).forEach(p=>{
     const zone=getZone(p.x||50,p.y||50);
     const div=document.createElement('div');div.className='sb-player';
-    div.innerHTML=`<div class="sb-dot" style="background:${p.color};"></div><div class="sb-info"><div class="sb-name">${esc(p.name)}${p.id===me?.id?' *':''}</div><div class="sb-status">${zone||'wandering...'}</div></div><div class="sb-act">${p.activity?p.activity.split(' ').pop():''}</div>`;
+    div.innerHTML=`<div class="sb-dot" style="background:${p.color};"></div><div class="sb-info"><div class="sb-name">${esc(p.name)}${p.id===me?.id?' ★':''}</div><div class="sb-status">${zone||'wandering'}</div></div><div class="sb-act">${p.activity?p.activity.split(' ').pop():''}</div>`;
     list.appendChild(div);
   });
-  $('sb-count').textContent=Object.keys(players).length+' ONLINE';
 }
 
-function getZone(x,y){
-  for(const[,z]of Object.entries(ZONES))if(x>=z.x[0]&&x<=z.x[1]&&y>=z.y[0]&&y<=z.y[1])return z.label;
-  return null;
+function updateBucksDisplay(){
+  $('my-bucks').textContent=myEconomy.bucks;
+  const shopBucks=$('shop-bucks');if(shopBucks)shopBucks.textContent=myEconomy.bucks;
+}
+
+function getZone(x,y){for(const[,z]of Object.entries(ZONES))if(x>=z.x[0]&&x<=z.x[1]&&y>=z.y[0]&&y<=z.y[1])return z.label;return null;}
+
+// ── Weather ───────────────────────────────────────────────────────────────────
+function setWeather(w){
+  currentWeather=w;
+  const ov=$('weather-overlay');ov.innerHTML='';
+  const pill=$('weather-pill');
+  if(w==='rain'||w==='storm'){
+    pill.textContent=w==='storm'?'⛈️ STORM':'🌧️ RAIN';
+    const count=w==='storm'?80:40;
+    for(let i=0;i<count;i++){
+      const d=document.createElement('div');d.className='rain-drop';
+      d.style.cssText=`left:${Math.random()*100}%;top:0;height:${8+Math.random()*12}px;animation-duration:${0.4+Math.random()*.4}s;animation-delay:${Math.random()*.5}s;`;
+      ov.appendChild(d);
+    }
+    if(w==='storm')ov.style.background='rgba(20,20,40,.15)';
+  }else if(w==='foggy'){pill.textContent='🌫️ FOGGY';ov.style.background='rgba(200,200,220,.12)';
+  }else{pill.textContent='🌤️ CLEAR';ov.style.background='transparent';}
+  addChat(null,`Weather changed: ${pill.textContent}`,true);
+}
+
+function updateTimeDisplay(){
+  const hours=Math.floor(gameTime/60);
+  const isNight=hours<6||hours>=20;
+  const isDusk=(hours>=18&&hours<20)||(hours>=6&&hours<8);
+  const night=$('night-overlay');
+  const sun=$('px-sun'),moon=$('px-moon');
+  if(isNight){night.style.background='rgba(0,0,30,.55)';sun.style.opacity='0';moon.style.opacity='1';$('time-pill').textContent='🌙 NIGHT';}
+  else if(isDusk){night.style.background='rgba(30,10,0,.2)';sun.style.opacity='.5';moon.style.opacity='0';$('time-pill').textContent='🌅 DUSK';}
+  else{night.style.background='rgba(0,0,0,0)';sun.style.opacity='1';moon.style.opacity='0';$('time-pill').textContent='☀️ DAY';}
+}
+
+// ── Announcement ──────────────────────────────────────────────────────────────
+function showAnnouncement(text,color){
+  const el=$('announcement');el.textContent=text;el.style.color=color||'#ffee00';el.style.display='block';el.style.borderColor=color||'#ffcc44';
+  clearTimeout(el._t);el._t=setTimeout(()=>el.style.display='none',4000);
+}
+
+// ── Reactions ─────────────────────────────────────────────────────────────────
+document.querySelectorAll('.react-btn').forEach(btn=>{
+  btn.onclick=()=>{if(!me)return;const emoji=btn.dataset.react;send({type:'reaction',id:me.id,emoji});spawnReaction(me.id,emoji);};
+});
+function spawnReaction(id,emoji){
+  const p=players[id];if(!p)return;
+  const layer=$('players-layer');
+  const el=document.createElement('div');el.className='reaction-burst';el.textContent=emoji;
+  el.style.left=p.x+'%';el.style.bottom=p.y+'%';
+  layer.appendChild(el);setTimeout(()=>el.remove(),900);
 }
 
 // ── Click to move ─────────────────────────────────────────────────────────────
 $('game-canvas').addEventListener('click',e=>{
   if(!me)return;
-  if(e.target.closest('.modal-overlay,.modal-box,#activity-menu,#activity-btn,#chat-panel,#hud,[id$="-trigger"],[id$="-modal"],#dj-trigger,#bar-trigger,#game-trigger,#fish-trigger,.px-fishing'))return;
+  if(e.target.closest('.modal-overlay,.modal-box,#activity-menu,#activity-btn,#chat-panel,#hud,#reactions-bar,[id$="-trigger"],[id$="-btn"],.px-fishing,.px-slots,.px-poker,svg'))return;
   const rect=e.currentTarget.getBoundingClientRect();
   const x=Math.max(2,Math.min(97,((e.clientX-rect.left)/rect.width)*100));
   const y=Math.max(7,Math.min(67,(1-(e.clientY-rect.top)/rect.height)*100));
   me.x=x;me.y=y;players[me.id]={...me};
-  send({type:'move',player:{id:me.id,name:me.name,color:me.color,x,y,activity:me.activity||null}});
+  send({type:'move',player:{id:me.id,name:me.name,color:me.color,x,y,activity:me.activity||null,equippedHat:me.equippedHat||null}});
   renderPlayers();updateSidebar();
   const zone=getZone(x,y);
-  if(zone){const zl=$('zone-label');zl.textContent=zone;zl.style.display='block';clearTimeout(zl._t);zl._t=setTimeout(()=>zl.style.display='none',2500);}
+  if(zone){const zl=$('zone-label');zl.textContent=zone;zl.style.display='block';clearTimeout(zl._t);zl._t=setTimeout(()=>zl.style.display='none',2200);}
 });
 
 // ── Chat ──────────────────────────────────────────────────────────────────────
 function sendChat(){
-  const inp=$('chat-input'),txt=inp.value.trim();
-  if(!txt||!me)return;inp.value='';
+  const inp=$('chat-input'),txt=inp.value.trim();if(!txt||!me)return;inp.value='';
+  // Commands
+  if(txt.startsWith('/roll')){
+    const roll=Math.floor(Math.random()*100)+1;
+    send({type:'chat',id:me.id,text:`🎲 rolled ${roll}/100`});
+    addChat(me.id,`🎲 rolled ${roll}/100`);return;
+  }
+  if(txt.startsWith('/me ')){
+    const action=txt.slice(4);
+    send({type:'chat',id:me.id,text:`* ${me.name} ${action}`});
+    addChat(me.id,`* ${me.name} ${action}`);return;
+  }
   me.bubble=txt;players[me.id]={...me};
   addChat(me.id,txt);send({type:'chat',id:me.id,text:txt});renderPlayers();
   if(myBubbleTimer)clearTimeout(myBubbleTimer);
@@ -786,10 +964,8 @@ function sendChat(){
 }
 $('chat-send').onclick=sendChat;
 $('chat-input').onkeydown=e=>{if(e.key==='Enter')sendChat();};
-
 function addChat(id,text,sys=false){
-  const box=$('chat-messages'),div=document.createElement('div');
-  div.className='chat-msg';
+  const box=$('chat-messages'),div=document.createElement('div');div.className='chat-msg';
   if(sys)div.innerHTML=`<span class="msg-sys">> ${esc(text)}</span>`;
   else div.innerHTML=`<span style="color:${players[id]?.color||'#ffcc44'};">${esc(players[id]?.name||id)}:</span> ${esc(text)}`;
   box.appendChild(div);box.scrollTop=box.scrollHeight;
@@ -797,30 +973,15 @@ function addChat(id,text,sys=false){
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-// ── Activity Menu ─────────────────────────────────────────────────────────────
+// ── Activity ──────────────────────────────────────────────────────────────────
 $('activity-btn').onclick=e=>{e.stopPropagation();$('activity-menu').classList.toggle('open');};
 document.addEventListener('click',()=>$('activity-menu').classList.remove('open'));
 $('activity-menu').addEventListener('click',e=>e.stopPropagation());
-document.querySelectorAll('.act-btn.has-sub').forEach(btn=>{
-  btn.onclick=e=>{e.stopPropagation();const sub=$(btn.dataset.sub),was=sub.classList.contains('open');document.querySelectorAll('.act-sub').forEach(s=>s.classList.remove('open'));if(!was)sub.classList.add('open');};
-});
+document.querySelectorAll('.act-btn.has-sub').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();const sub=$(btn.dataset.sub),was=sub.classList.contains('open');document.querySelectorAll('.act-sub').forEach(s=>s.classList.remove('open'));if(!was)sub.classList.add('open');};});
 document.querySelectorAll('.act-btn[data-activity]').forEach(btn=>{
-  btn.onclick=e=>{e.stopPropagation();if(!me)return;
-    me.activity=btn.dataset.activity;players[me.id]={...me};
-    send({type:'activity',id:me.id,activity:me.activity});
-    addChat(null,`${me.name} is ${me.activity}`,true);
-    renderPlayers();updateSidebar();
-    $('activity-menu').classList.remove('open');
-    $('activity-btn').textContent=':: '+me.activity.split(' ').slice(0,-1).join(' ').substring(0,16).toUpperCase();
-  };
+  btn.onclick=e=>{e.stopPropagation();if(!me)return;me.activity=btn.dataset.activity;players[me.id]={...me};send({type:'activity',id:me.id,activity:me.activity});addChat(null,`${me.name} is ${me.activity}`,true);renderPlayers();updateSidebar();$('activity-menu').classList.remove('open');$('activity-btn').textContent=':: '+me.activity.split(' ').slice(0,-1).join(' ').substring(0,15).toUpperCase();};
 });
-$('clear-activity').onclick=e=>{e.stopPropagation();if(!me)return;
-  me.activity=null;players[me.id]={...me};
-  send({type:'activity',id:me.id,activity:null});
-  renderPlayers();updateSidebar();
-  $('activity-btn').textContent=':: ACTIVITY';
-  $('activity-menu').classList.remove('open');
-};
+$('clear-activity').onclick=e=>{e.stopPropagation();if(!me)return;me.activity=null;players[me.id]={...me};send({type:'activity',id:me.id,activity:null});renderPlayers();updateSidebar();$('activity-btn').textContent=':: ACTIVITY';$('activity-menu').classList.remove('open');};
 
 // ── Modals ────────────────────────────────────────────────────────────────────
 document.querySelectorAll('.modal-close').forEach(btn=>{btn.onclick=()=>$(btn.dataset.close).style.display='none';});
@@ -832,183 +993,144 @@ $('bar-trigger').onclick=e=>{e.stopPropagation();openModal('bar-modal');};
 $('game-trigger').onclick=e=>{e.stopPropagation();openModal('game-modal');initChess();};
 $('fish-trigger').onclick=e=>{e.stopPropagation();openModal('fish-modal');const cb=$('cast-btn');if(cb){cb.onclick=castFish;cb.disabled=false;cb.textContent='🎣 CAST LINE';}};
 document.querySelector('.px-fishing').onclick=e=>{e.stopPropagation();openModal('fish-modal');const cb=$('cast-btn');if(cb){cb.onclick=castFish;cb.disabled=false;cb.textContent='🎣 CAST LINE';}};
+$('slots-trigger').onclick=e=>{e.stopPropagation();openModal('slots-modal');};
+document.querySelector('.px-slots').onclick=e=>{e.stopPropagation();openModal('slots-modal');};
+$('poker-trigger').onclick=e=>{e.stopPropagation();openModal('poker-modal');};
+document.querySelector('.px-poker').onclick=e=>{e.stopPropagation();openModal('poker-modal');};
+$('tv-trigger').onclick=e=>{e.stopPropagation();openModal('tv-modal');};
 $('basement-trigger').onclick=e=>{e.stopPropagation();openModal('basement-modal');if(me){addChat(null,`${me.name} found the secret basement 👀`,true);send({type:'chat',id:me.id,text:'🚪 just found the secret basement...'});}};
+$('lb-open-btn').onclick=()=>{openModal('lb-modal');send({type:'leaderboard-request'});renderLeaderboard();};
+$('stats-open-btn').onclick=()=>{openModal('stats-modal');renderStats();};
+$('shop-open-btn').onclick=()=>{openModal('shop-modal');$('shop-bucks').textContent=myEconomy.bucks;renderShop();};
 
 // ── DJ ────────────────────────────────────────────────────────────────────────
-$('dj-submit').onclick=()=>{
-  const val=$('dj-input').value.trim();if(!val||!me)return;
-  send({type:'dj',id:me.id,text:val});
-  $('now-playing').style.display='block';$('now-playing').textContent='♪ '+val;
-  $('dj-nowplaying').textContent='Now playing: '+val;
-  $('dj-input').value='';
-  me.activity='spinning records 🎧';players[me.id]={...me};
-  send({type:'activity',id:me.id,activity:me.activity});
-  renderPlayers();updateSidebar();
-};
+$('dj-submit').onclick=()=>{const val=$('dj-input').value.trim();if(!val||!me)return;send({type:'dj',id:me.id,text:val});$('now-playing').style.display='block';$('now-playing').textContent='♪ '+val;$('dj-nowplaying').textContent='Now playing: '+val;$('dj-input').value='';me.activity='spinning records 🎧';players[me.id]={...me};send({type:'activity',id:me.id,activity:me.activity});renderPlayers();updateSidebar();};
 
 // ── Bar ───────────────────────────────────────────────────────────────────────
-document.querySelectorAll('.drink-btn').forEach(btn=>{
-  btn.onclick=()=>{if(!me)return;
-    me.activity=btn.dataset.drink;players[me.id]={...me};
-    send({type:'activity',id:me.id,activity:me.activity});
-    addChat(null,`${me.name} is ${me.activity}`,true);
-    renderPlayers();updateSidebar();
-    $('bar-modal').style.display='none';
-    $('activity-btn').textContent=':: '+me.activity.split(' ').slice(0,-1).join(' ').substring(0,16).toUpperCase();
-  };
-});
+document.querySelectorAll('.drink-btn').forEach(btn=>{btn.onclick=()=>{if(!me)return;me.activity=btn.dataset.drink;players[me.id]={...me};send({type:'activity',id:me.id,activity:me.activity});addChat(null,`${me.name} is ${me.activity}`,true);renderPlayers();updateSidebar();$('bar-modal').style.display='none';$('activity-btn').textContent=':: '+me.activity.split(' ').slice(0,-1).join(' ').substring(0,15).toUpperCase();};});
 
 // ── Chess ─────────────────────────────────────────────────────────────────────
 let chessBoard=[],chessTurn='w',chessSelected=null;
 const CHESS_INIT=[['r','n','b','q','k','b','n','r'],['p','p','p','p','p','p','p','p'],[' ',' ',' ',' ',' ',' ',' ',' '],[' ',' ',' ',' ',' ',' ',' ',' '],[' ',' ',' ',' ',' ',' ',' ',' '],[' ',' ',' ',' ',' ',' ',' ',' '],['P','P','P','P','P','P','P','P'],['R','N','B','Q','K','B','N','R']];
-const CHESS_GLYPHS={r:'♜',n:'♞',b:'♝',q:'♛',k:'♚',p:'♟',R:'♖',N:'♘',B:'♗',Q:'♕',K:'♔',P:'♙'};
-
-function initChess(){
-  chessBoard=CHESS_INIT.map(r=>[...r]);chessTurn='w';chessSelected=null;renderChess();$('game-status').textContent="White's turn";
-}
-function renderChess(){
-  const board=$('chess-board');board.innerHTML='';
-  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
-    const cell=document.createElement('div');
-    cell.className='cell '+((r+c)%2===0?'light':'dark');
-    const piece=chessBoard[r][c];
-    if(piece&&piece!==' ')cell.textContent=CHESS_GLYPHS[piece]||piece;
-    if(chessSelected&&chessSelected[0]===r&&chessSelected[1]===c)cell.classList.add('selected');
-    cell.onclick=()=>handleChessClick(r,c);
-    board.appendChild(cell);
-  }
-}
-function handleChessClick(r,c){
-  const piece=chessBoard[r][c];
-  const isWhite=piece===piece.toUpperCase()&&piece!==' ';
-  const isBlack=piece===piece.toLowerCase()&&piece!==' ';
-  if(!chessSelected){
-    if((chessTurn==='w'&&isWhite)||(chessTurn==='b'&&isBlack)){chessSelected=[r,c];renderChess();}
-  }else{
-    const[sr,sc]=chessSelected;
-    if(r===sr&&c===sc){chessSelected=null;renderChess();return;}
-    chessBoard[r][c]=chessBoard[sr][sc];chessBoard[sr][sc]=' ';
-    chessSelected=null;chessTurn=chessTurn==='w'?'b':'w';
-    $('game-status').textContent=(chessTurn==='w'?"White's":"Black's")+' turn';
-    renderChess();
-  }
-}
-
-// ── Checkers ──────────────────────────────────────────────────────────────────
+const CHESS_G={r:'♜',n:'♞',b:'♝',q:'♛',k:'♚',p:'♟',R:'♖',N:'♘',B:'♗',Q:'♕',K:'♔',P:'♙'};
+function initChess(){chessBoard=CHESS_INIT.map(r=>[...r]);chessTurn='w';chessSelected=null;renderChess();$('game-status').textContent="White's turn";}
+function renderChess(){const board=$('chess-board');board.innerHTML='';for(let r=0;r<8;r++)for(let c=0;c<8;c++){const cell=document.createElement('div');cell.className='cell '+((r+c)%2===0?'light':'dark');const piece=chessBoard[r][c];if(piece&&piece!==' ')cell.textContent=CHESS_G[piece]||piece;if(chessSelected&&chessSelected[0]===r&&chessSelected[1]===c)cell.classList.add('selected');cell.onclick=()=>handleChessClick(r,c);board.appendChild(cell);}}
+function handleChessClick(r,c){const piece=chessBoard[r][c];const isW=piece===piece.toUpperCase()&&piece!==' ';const isB=piece===piece.toLowerCase()&&piece!==' ';if(!chessSelected){if((chessTurn==='w'&&isW)||(chessTurn==='b'&&isB)){chessSelected=[r,c];renderChess();}}else{const[sr,sc]=chessSelected;if(r===sr&&c===sc){chessSelected=null;renderChess();return;}chessBoard[r][c]=chessBoard[sr][sc];chessBoard[sr][sc]=' ';chessSelected=null;chessTurn=chessTurn==='w'?'b':'w';$('game-status').textContent=(chessTurn==='w'?"White's":"Black's")+' turn';renderChess();send({type:'game-win',value:0});}}
 let ckBoard=[],ckTurn='r',ckSelected=null;
-function initCheckers(){
-  ckBoard=Array(8).fill(null).map(()=>Array(8).fill(null));
-  for(let r=0;r<3;r++)for(let c=0;c<8;c++)if((r+c)%2!==0)ckBoard[r][c]={color:'b',king:false};
-  for(let r=5;r<8;r++)for(let c=0;c<8;c++)if((r+c)%2!==0)ckBoard[r][c]={color:'r',king:false};
-  ckTurn='r';ckSelected=null;renderCheckers();$('game-status').textContent="Red's turn";
-}
-function renderCheckers(){
-  const board=$('checkers-board');board.innerHTML='';
-  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
-    const cell=document.createElement('div');
-    cell.className='cell '+((r+c)%2===0?'light':'dark');
-    const piece=ckBoard[r][c];
-    if(piece){const ch=document.createElement('div');ch.className='checker '+piece.color;ch.textContent=piece.king?'K':'';cell.appendChild(ch);}
-    if(ckSelected&&ckSelected[0]===r&&ckSelected[1]===c)cell.classList.add('selected');
-    cell.onclick=()=>handleCheckersClick(r,c);
-    board.appendChild(cell);
-  }
-}
-function handleCheckersClick(r,c){
-  const piece=ckBoard[r][c];
-  if(!ckSelected){
-    if(piece&&piece.color===ckTurn){ckSelected=[r,c];renderCheckers();}
-  }else{
-    const[sr,sc]=ckSelected;
-    if(r===sr&&c===sc){ckSelected=null;renderCheckers();return;}
-    const dr=r-sr,dc=c-sc;
-    if(Math.abs(dr)===1&&Math.abs(dc)===1&&!ckBoard[r][c]){
-      ckBoard[r][c]=ckBoard[sr][sc];ckBoard[sr][sc]=null;
-      if((ckBoard[r][c].color==='r'&&r===0)||(ckBoard[r][c].color==='b'&&r===7))ckBoard[r][c].king=true;
-      ckSelected=null;ckTurn=ckTurn==='r'?'b':'r';
-      $('game-status').textContent=(ckTurn==='r'?"Red's":"Black's")+' turn';renderCheckers();
-    }else if(Math.abs(dr)===2&&Math.abs(dc)===2){
-      const mr=sr+dr/2,mc=sc+dc/2;
-      if(ckBoard[mr][mc]&&ckBoard[mr][mc].color!==ckTurn){
-        ckBoard[r][c]=ckBoard[sr][sc];ckBoard[sr][sc]=null;ckBoard[mr][mc]=null;
-        if((ckBoard[r][c].color==='r'&&r===0)||(ckBoard[r][c].color==='b'&&r===7))ckBoard[r][c].king=true;
-        ckSelected=null;ckTurn=ckTurn==='r'?'b':'r';
-        $('game-status').textContent=(ckTurn==='r'?"Red's":"Black's")+' turn';renderCheckers();
-      }else{ckSelected=null;renderCheckers();}
-    }else{ckSelected=null;renderCheckers();}
-  }
-}
-
-document.querySelectorAll('.game-tab').forEach(tab=>{
-  tab.onclick=()=>{
-    document.querySelectorAll('.game-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');
-    if(tab.dataset.game==='chess'){$('chess-board').style.display='grid';$('checkers-board').style.display='none';initChess();}
-    else{$('chess-board').style.display='none';$('checkers-board').style.display='grid';initCheckers();}
-  };
-});
+function initCheckers(){ckBoard=Array(8).fill(null).map(()=>Array(8).fill(null));for(let r=0;r<3;r++)for(let c=0;c<8;c++)if((r+c)%2!==0)ckBoard[r][c]={color:'b',king:false};for(let r=5;r<8;r++)for(let c=0;c<8;c++)if((r+c)%2!==0)ckBoard[r][c]={color:'r',king:false};ckTurn='r';ckSelected=null;renderCheckers();$('game-status').textContent="Red's turn";}
+function renderCheckers(){const board=$('checkers-board');board.innerHTML='';for(let r=0;r<8;r++)for(let c=0;c<8;c++){const cell=document.createElement('div');cell.className='cell '+((r+c)%2===0?'light':'dark');const piece=ckBoard[r][c];if(piece){const ch=document.createElement('div');ch.className='checker '+piece.color;ch.textContent=piece.king?'K':'';cell.appendChild(ch);}if(ckSelected&&ckSelected[0]===r&&ckSelected[1]===c)cell.classList.add('selected');cell.onclick=()=>handleCkClick(r,c);board.appendChild(cell);}}
+function handleCkClick(r,c){const piece=ckBoard[r][c];if(!ckSelected){if(piece&&piece.color===ckTurn){ckSelected=[r,c];renderCheckers();}}else{const[sr,sc]=ckSelected;if(r===sr&&c===sc){ckSelected=null;renderCheckers();return;}const dr=r-sr,dc=c-sc;if(Math.abs(dr)===1&&Math.abs(dc)===1&&!ckBoard[r][c]){ckBoard[r][c]=ckBoard[sr][sc];ckBoard[sr][sc]=null;if((ckBoard[r][c].color==='r'&&r===0)||(ckBoard[r][c].color==='b'&&r===7))ckBoard[r][c].king=true;ckSelected=null;ckTurn=ckTurn==='r'?'b':'r';$('game-status').textContent=(ckTurn==='r'?"Red's":"Black's")+' turn';renderCheckers();}else if(Math.abs(dr)===2&&Math.abs(dc)===2){const mr=sr+dr/2,mc=sc+dc/2;if(ckBoard[mr][mc]&&ckBoard[mr][mc].color!==ckTurn){ckBoard[r][c]=ckBoard[sr][sc];ckBoard[sr][sc]=null;ckBoard[mr][mc]=null;if((ckBoard[r][c].color==='r'&&r===0)||(ckBoard[r][c].color==='b'&&r===7))ckBoard[r][c].king=true;ckSelected=null;ckTurn=ckTurn==='r'?'b':'r';$('game-status').textContent=(ckTurn==='r'?"Red's":"Black's")+' turn';renderCheckers();send({type:'game-win',value:25});}else{ckSelected=null;renderCheckers();}}else{ckSelected=null;renderCheckers();}}}
+document.querySelectorAll('.game-tab').forEach(tab=>{tab.onclick=()=>{document.querySelectorAll('.game-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');if(tab.dataset.game==='chess'){$('chess-board').style.display='grid';$('checkers-board').style.display='none';initChess();}else{$('chess-board').style.display='none';$('checkers-board').style.display='grid';initCheckers();}};});
 $('game-reset').onclick=()=>{const a=document.querySelector('.game-tab.active');if(a.dataset.game==='chess')initChess();else initCheckers();};
 
 // ── Fishing ───────────────────────────────────────────────────────────────────
-const FISH_CATCHES=[
-  {name:'🐟 Bluegill',rarity:'common',pts:5},{name:'🐠 Bass',rarity:'common',pts:8},
-  {name:'🎣 Catfish',rarity:'uncommon',pts:15},{name:'🐡 Trout',rarity:'uncommon',pts:18},
-  {name:'🦈 Baby Shark',rarity:'rare',pts:40},{name:'🐙 Octopus',rarity:'rare',pts:45},
-  {name:'👟 Old Boot',rarity:'common',pts:0},{name:'🗑️ Trash Bag',rarity:'common',pts:0},
-  {name:'💀 Mystery Bone',rarity:'uncommon',pts:20},{name:'🧜 Mermaid',rarity:'legendary',pts:100},
-];
-let fishing=false,fishInterval=null,fishProgress=0;
-
+const FISH_CATCHES=[{name:'🐟 Bluegill',rarity:'common',pts:5},{name:'🐠 Bass',rarity:'common',pts:8},{name:'🎣 Catfish',rarity:'uncommon',pts:15},{name:'🐡 Trout',rarity:'uncommon',pts:18},{name:'🦈 Baby Shark',rarity:'rare',pts:40,legendary:false},{name:'🐙 Octopus',rarity:'rare',pts:45,legendary:false},{name:'👟 Old Boot',rarity:'common',pts:0},{name:'🗑️ Trash Bag',rarity:'common',pts:0},{name:'💀 Mystery Bone',rarity:'uncommon',pts:20},{name:'🧜 Mermaid',rarity:'legendary',pts:100,legendary:true}];
 function castFish(){
-  if(fishing)return;
-  fishing=true;fishProgress=0;
-  const cb=$('cast-btn');
-  cb.textContent='🌊 Waiting...';cb.disabled=true;
-  $('fish-meter-wrap').style.display='block';$('fish-result').textContent='';$('fish-msg').textContent='Keep your eyes on the line...';
-  clearInterval(fishInterval);
-  fishInterval=setInterval(()=>{fishProgress=(fishProgress+2)%100;$('fish-meter').style.width=fishProgress+'%';},80);
-  const wait=3000+Math.random()*5000;
+  if(fishing)return;fishing=true;const cb=$('cast-btn');
+  cb.textContent='🌊 Waiting...';cb.disabled=true;$('fish-meter-wrap').style.display='block';$('fish-result').textContent='';$('fish-msg').textContent='Keep your eyes on the line...';
+  clearInterval(fishInterval);fishInterval=setInterval(()=>{const fm=$('fish-meter');if(fm)fm.style.width=((parseInt(fm.style.width)||0)+2)%100+'%';},80);
   setTimeout(()=>{
-    if(!fishing)return;
-    $('fish-msg').textContent='>> BITE! Click Reel In!';cb.textContent='🎣 REEL IN!';cb.disabled=false;fishing='bite';
-    const et=setTimeout(()=>{$('fish-msg').textContent='It got away...';$('fish-result').textContent='~';endFish();},3000);
+    if(!fishing)return;$('fish-msg').textContent='>> BITE! Click Reel In!';cb.textContent='🎣 REEL IN!';cb.disabled=false;fishing='bite';
+    const et=setTimeout(()=>{$('fish-msg').textContent='It got away...';endFish();},3000);
     cb.onclick=()=>{
-      clearTimeout(et);
-      const roll=Math.random();
-      let pool;
-      if(roll<.5)pool=FISH_CATCHES.filter(f=>f.rarity==='common');
-      else if(roll<.8)pool=FISH_CATCHES.filter(f=>f.rarity==='uncommon');
-      else if(roll<.97)pool=FISH_CATCHES.filter(f=>f.rarity==='rare');
-      else pool=FISH_CATCHES.filter(f=>f.rarity==='legendary');
+      clearTimeout(et);const roll=Math.random();
+      let pool;if(roll<.5)pool=FISH_CATCHES.filter(f=>f.rarity==='common');else if(roll<.8)pool=FISH_CATCHES.filter(f=>f.rarity==='uncommon');else if(roll<.97)pool=FISH_CATCHES.filter(f=>f.rarity==='rare');else pool=FISH_CATCHES.filter(f=>f.rarity==='legendary');
       const catch_=pool[Math.floor(Math.random()*pool.length)];
       $('fish-result').textContent=catch_.name;
-      $('fish-msg').textContent=catch_.pts?`Nice catch! +${catch_.pts} pts`:'Better luck next time...';
-      if(catch_.pts&&me)addChat(null,`${me.name} caught ${catch_.name}!`,true);
+      $('fish-msg').textContent=catch_.pts?`Nice catch! +${catch_.pts} 🪙`:'Better luck next time...';
+      if(catch_.pts){send({type:'fish-catch',value:catch_.pts,name:catch_.name,legendary:catch_.legendary||false});if(me)addChat(null,`${me.name} caught ${catch_.name}!`,true);}
       endFish();
     };
-  },wait);
+  },3000+Math.random()*5000);
 }
-function endFish(){
-  fishing=false;clearInterval(fishInterval);
-  $('fish-meter-wrap').style.display='none';$('fish-meter').style.width='0%';
-  setTimeout(()=>{const cb=$('cast-btn');if(cb){cb.textContent='🎣 CAST LINE';cb.disabled=false;cb.onclick=castFish;}},1800);
+function endFish(){fishing=false;clearInterval(fishInterval);$('fish-meter-wrap').style.display='none';const fm=$('fish-meter');if(fm)fm.style.width='0%';setTimeout(()=>{const cb=$('cast-btn');if(cb){cb.textContent='🎣 CAST LINE';cb.disabled=false;cb.onclick=castFish;}},1800);}
+
+// ── Slots ─────────────────────────────────────────────────────────────────────
+function weightedSymbol(){const total=SLOT_WEIGHTS.reduce((a,b)=>a+b,0);let r=Math.random()*total;for(let i=0;i<SLOT_SYMBOLS.length;i++){r-=SLOT_WEIGHTS[i];if(r<=0)return SLOT_SYMBOLS[i];}return SLOT_SYMBOLS[0];}
+$('bet-down').onclick=()=>{slotsBet=Math.max(5,slotsBet-5);$('slots-bet').textContent=`BET: ${slotsBet} 🪙`;};
+$('bet-up').onclick=()=>{slotsBet=Math.min(50,slotsBet+5);$('slots-bet').textContent=`BET: ${slotsBet} 🪙`;};
+$('spin-btn').onclick=()=>{
+  if(slotsSpinning||!me)return;
+  if(myEconomy.bucks<slotsBet){showAnnouncement('Not enough Lake Bucks!','#ff4444');return;}
+  slotsSpinning=true;send({type:'slots-spin',bet:slotsBet});
+  $('slots-result').textContent='';
+  const reels=[$('reel1'),$('reel2'),$('reel3')];
+  let ticks=0;const interval=setInterval(()=>{reels.forEach(r=>{r.textContent=weightedSymbol();});ticks++;if(ticks>20){clearInterval(interval);const r1=weightedSymbol(),r2=weightedSymbol(),r3=weightedSymbol();reels[0].textContent=r1;reels[1].textContent=r2;reels[2].textContent=r3;
+    let win=0,jackpot=false;
+    if(r1===r2&&r2===r3){if(r1==='💎'){win=slotsBet*50;jackpot=true;}else if(r1==='7️⃣'){win=slotsBet*20;}else if(r1==='🎰'){win=slotsBet*15;}else win=slotsBet*5;}
+    else if(r1===r2||r2===r3||r1===r3){win=Math.floor(slotsBet*1.5);}
+    if(win>0){$('slots-result').textContent=jackpot?`💥 JACKPOT! +${win} 🪙`:`WIN! +${win} 🪙`;send({type:'slots-win',value:win,jackpot});}
+    else{$('slots-result').textContent='No luck...';}
+    slotsSpinning=false;
+  }},80);
+};
+
+// ── Poker ─────────────────────────────────────────────────────────────────────
+let myPokerHand=[];
+$('poker-join-btn').onclick=()=>{if(!me)return;send({type:'poker-join'});$('poker-status').textContent='Looking for opponents...';$('poker-join-btn').disabled=true;};
+function cardHTML(card){if(!card||card==='back')return`<div class="card back"></div>`;if(card==='empty')return`<div class="card empty"></div>`;const suit=card.slice(-1);const isRed=suit==='♥'||suit==='♦';return`<div class="card ${isRed?'red':''}">${card}</div>`;}
+function renderPokerHand(msg){myPokerHand=msg.hand||[];$('poker-table').style.display='block';$('poker-join-btn').style.display='none';$('my-hand').innerHTML=myPokerHand.map(cardHTML).join('');$('poker-pot').textContent=`POT: ${msg.pot} 🪙`;$('poker-community').innerHTML=(msg.community||[]).map(cardHTML).join('')||cardHTML('empty').repeat(5);$('poker-status').textContent=msg.currentPlayer===me?.id?'YOUR TURN':'Waiting...';}
+function renderPokerState(msg){$('poker-pot').textContent=`POT: ${msg.pot} 🪙`;$('poker-community').innerHTML=msg.community.map(cardHTML).join('')+'<div class="card empty"></div>'.repeat(5-msg.community.length);$('poker-players-row').innerHTML=msg.players.map(p=>`<div class="poker-player-chip ${p.id===msg.currentPlayer?'active':''} ${p.folded?'folded':''}">${p.name} (${p.bet}🪙)</div>`).join('');const isMyTurn=msg.currentPlayer===me?.id;$('poker-status').textContent=isMyTurn?'YOUR TURN – make a move!':msg.players.find(p=>p.id===msg.currentPlayer)?.name+"'s turn";if(isMyTurn){$('poker-actions').innerHTML=`<button class="px-btn" onclick="pokerAction('fold')">FOLD</button><button class="px-btn green" onclick="pokerAction('call')">CALL</button><button class="px-btn" onclick="pokerAction('raise')">RAISE</button>`;}else{$('poker-actions').innerHTML='';}}
+function pokerAction(action){send({type:'poker-action',action});}
+window.pokerAction=pokerAction;
+function renderPokerEnd(msg){const win=msg.winner===me?.id;showAnnouncement(win?`🃏 YOU WIN ${msg.pot} BUCKS!`:`♠ ${msg.winnerName} wins ${msg.pot} bucks!`,win?'#aaffaa':'#ffcc44');$('poker-table').style.display='none';$('poker-join-btn').style.display='block';$('poker-join-btn').disabled=false;$('poker-status').textContent='Game over. Join a new game?';myPokerHand=[];}
+
+// ── Leaderboard ───────────────────────────────────────────────────────────────
+let currentLbTab='bucks';
+document.querySelectorAll('.lb-tab').forEach(tab=>{tab.onclick=()=>{document.querySelectorAll('.lb-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');currentLbTab=tab.dataset.lb;renderLeaderboard();};});
+function renderLeaderboard(){
+  const content=$('lb-content');if(!lbData||!lbData[currentLbTab]){content.innerHTML='<p style="font-size:7px;color:#664422;padding:8px;">No data yet.</p>';return;}
+  const cols={bucks:{label:'BUCKS',key:'bucks'},fish:{label:'FISH',key:'fishCaught'},wins:{label:'WINS',key:'gamesWon'},time:{label:'MINS',key:'timeOnline'}};
+  const col=cols[currentLbTab];
+  content.innerHTML=`<table class="lb-table"><thead><tr><th>#</th><th>PLAYER</th><th>${col.label}</th></tr></thead><tbody>${(lbData[currentLbTab]||[]).map((p,i)=>`<tr><td><span class="lb-rank">${i+1}</span>${i===0?'🥇':i===1?'🥈':i===2?'🥉':''}</td><td><span style="color:${p.color||'#ffdd88'}">${esc(p.name||'?')}</span></td><td>${p[col.key]||0}</td></tr>`).join('')}</tbody></table>`;
 }
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function renderStats(){
+  $('stats-content').innerHTML=`
+    <div class="stat-row"><span class="stat-label">LAKE BUCKS</span><span class="stat-val">💰 ${myEconomy.bucks}</span></div>
+    <div class="stat-row"><span class="stat-label">FISH CAUGHT</span><span class="stat-val">🎣 ${myEconomy.fishCaught}</span></div>
+    <div class="stat-row"><span class="stat-label">GAMES WON</span><span class="stat-val">🏆 ${myEconomy.gamesWon}</span></div>
+    <div class="stat-row"><span class="stat-label">MINS ONLINE</span><span class="stat-val">⏱️ ${myEconomy.timeOnline}</span></div>
+    <div class="stat-row"><span class="stat-label">HATS OWNED</span><span class="stat-val">🎩 ${myEconomy.hats.length}</span></div>
+    <div class="stat-row"><span class="stat-label">HAT EQUIPPED</span><span class="stat-val">${myEconomy.equippedHat?HATS[myEconomy.equippedHat].emoji+' '+HATS[myEconomy.equippedHat].name:'none'}</span></div>`;
+}
+
+// ── Shop ──────────────────────────────────────────────────────────────────────
+function renderShop(){
+  const grid=$('hat-grid');grid.innerHTML='';
+  Object.entries(HATS).forEach(([key,hat])=>{
+    const owned=myEconomy.hats.includes(key);
+    const div=document.createElement('div');div.className='hat-item'+(owned?' owned':'');
+    div.innerHTML=`<span class="hat-emoji">${hat.emoji}</span><div class="hat-name">${hat.name}</div><div class="hat-price">💰 ${hat.price}</div><button class="hat-equip" data-hat="${key}">${myEconomy.equippedHat===key?'✓ ON':'EQUIP'}</button>`;
+    if(!owned)div.onclick=()=>{send({type:'buy-hat',hat:key});};
+    div.querySelector('.hat-equip')?.addEventListener('click',e=>{e.stopPropagation();equipHat(key);});
+    grid.appendChild(div);
+  });
+}
+function equipHat(key){if(!me)return;me.equippedHat=myEconomy.equippedHat===key?null:key;myEconomy.equippedHat=me.equippedHat;players[me.id]={...me};send({type:'move',player:{...me}});renderPlayers();renderShop();renderStats();}
+
+// ── TV ────────────────────────────────────────────────────────────────────────
+$('tv-submit').onclick=()=>{const url=$('tv-input').value.trim();if(!url||!me)return;const ytId=url.match(/(?:v=|youtu\.be\/)([^&\n?#]+)/)?.[1];if(ytId){const embedUrl=`https://www.youtube.com/embed/${ytId}?autoplay=1`;send({type:'tv',id:me.id,url:embedUrl});loadTV(embedUrl);}else{showAnnouncement('Paste a YouTube URL!','#ff4444');}$('tv-input').value='';};
+function loadTV(url){const frame=$('tv-frame');frame.innerHTML=`<iframe src="${url}" allowfullscreen allow="autoplay"></iframe>`;}
 
 // ── Join ──────────────────────────────────────────────────────────────────────
 $('join-btn').onclick=()=>{
   const name=$('name-input').value.trim()||'anon';
-  me={id:name+'_'+Math.random().toString(36).slice(2,7),name,color:chosenColor,x:25+Math.random()*50,y:32+Math.random()*18,bubble:null,activity:null};
+  me={id:name+'_'+Math.random().toString(36).slice(2,7),name,color:chosenColor,x:25+Math.random()*50,y:32+Math.random()*18,bubble:null,activity:null,equippedHat:null};
   players[me.id]={...me};
   $('login-panel').style.display='none';
   connectWS();
   send({type:'join',player:{...me}});
-  addChat(null,`${name} has entered the lake house. Click to move!`,true);
+  addChat(null,`${name} entered the lake house. Click to move!`,true);
+  addChat(null,'Tip: /roll for dice, /me for actions, reactions bar above chat',true);
   renderPlayers();updateSidebar();
   setInterval(()=>{if(me)send({type:'join',player:{...me}});},10000);
   window.addEventListener('beforeunload',()=>{if(me)send({type:'leave',id:me.id});});
 };
 $('name-input').onkeydown=e=>{if(e.key==='Enter')$('join-btn').click();};
 
-}); // end DOMContentLoaded
+}); // DOMContentLoaded
 </script>
 </body>
 </html>
