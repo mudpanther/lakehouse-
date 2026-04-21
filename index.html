@@ -91,6 +91,20 @@
     #join-btn:hover { background: #444; }
     #ws-url-note { font-size: 11px; color: #999; text-align: center; }
 
+    /* ---- Activity Menu ---- */
+    #activity-btn { position: absolute; bottom: 14px; left: 14px; z-index: 5; padding: 8px 14px; border-radius: 20px; border: 1px solid #555; background: rgba(30,30,30,0.85); color: #fff; font-size: 13px; cursor: pointer; transition: background 0.15s; }
+    #activity-btn:hover { background: rgba(60,60,60,0.95); }
+    #activity-menu { position: absolute; bottom: 52px; left: 14px; z-index: 10; background: rgba(20,20,20,0.95); border: 1px solid #444; border-radius: 12px; padding: 10px; display: none; flex-direction: column; gap: 6px; min-width: 190px; }
+    #activity-menu.open { display: flex; }
+    .act-section { font-size: 10px; color: #888; padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .act-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid #333; background: transparent; color: #eee; font-size: 13px; cursor: pointer; text-align: left; transition: background 0.1s; }
+    .act-btn:hover { background: rgba(255,255,255,0.1); }
+    .act-btn.has-sub::after { content: " ›"; color: #888; }
+    .act-sub { display: none; flex-direction: column; gap: 4px; padding-left: 10px; border-left: 1px solid #333; margin-left: 6px; }
+    .act-sub.open { display: flex; }
+    .act-clear { padding: 6px 12px; border-radius: 8px; border: 1px solid #553333; background: transparent; color: #e88; font-size: 12px; cursor: pointer; text-align: left; margin-top: 4px; }
+    .act-clear:hover { background: rgba(255,80,80,0.1); }
+    .player-activity { font-size: 16px; line-height: 1; margin-bottom: 2px; }
     /* Responsive */
     @media (max-width: 920px) { #app { width: 100vw; height: 100vh; border-radius: 0; } }
   </style>
@@ -164,6 +178,36 @@
       </div>
     </div>
 
+    <!-- Activity Button & Menu -->
+    <button id="activity-btn">🎯 activity</button>
+    <div id="activity-menu">
+      <div class="act-section">what are you doing?</div>
+
+      <button class="act-btn has-sub" data-sub="smoke-sub">🌿 smoke</button>
+      <div class="act-sub" id="smoke-sub">
+        <button class="act-btn" data-activity="smoking a rig 🔥">🔥 rig</button>
+        <button class="act-btn" data-activity="hitting the bong 💨">💨 bong</button>
+        <button class="act-btn" data-activity="smoking a joint 🚬">🚬 joint</button>
+        <button class="act-btn" data-activity="rolling a blunt 🍃">🍃 blunt</button>
+        <button class="act-btn" data-activity="hash party 🫧">🫧 hash party</button>
+      </div>
+
+      <button class="act-btn has-sub" data-sub="fish-sub">🎣 fish</button>
+      <div class="act-sub" id="fish-sub">
+        <button class="act-btn" data-activity="lake fishing 🎣">🎣 lake fish</button>
+        <button class="act-btn" data-activity="deep sea fishing 🌊">🌊 ocean</button>
+        <button class="act-btn" data-activity="fly fishing 🪰">🪰 fly fishing</button>
+        <button class="act-btn" data-activity="cat calling 😼">😼 cat calling</button>
+      </div>
+
+      <button class="act-btn" data-activity="chilling at the DJ booth 🎧">🎧 dj</button>
+      <button class="act-btn" data-activity="vibing by the fire 🔥">🔥 campfire</button>
+      <button class="act-btn" data-activity="relaxing inside 🏡">🏡 inside</button>
+      <button class="act-btn" data-activity="out on the boat ⛵">⛵ boat ride</button>
+
+      <button class="act-clear" id="clear-activity">✕ clear activity</button>
+    </div>
+
     <!-- Login -->
     <div id="login-panel">
       <div class="login-card">
@@ -180,9 +224,10 @@
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
-// After deploying server.ts to Deno Deploy, paste your project URL here:
-// e.g. "wss://lakehouse-server.deno.dev/ws"
-const WS_URL = "YOUR_DENO_DEPLOY_URL_HERE/ws";
+// After deploying to Railway, paste your Railway URL here:
+// e.g. "wss://lakehouse-production-abc1.up.railway.app/ws"
+// Railway gives you a URL under: Settings → Networking → Public Domain
+const WS_URL = "YOUR_RAILWAY_URL_HERE/ws";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const COLORS = ['#e05c5c','#e07c3a','#e0c040','#4db86e','#3a9ad9','#9b59e0','#e05cb0','#5cd4d4','#ff8c42','#a8e6cf'];
@@ -231,9 +276,9 @@ COLORS.forEach(c => {
 
 // ── WebSocket ─────────────────────────────────────────────────────────────────
 function connectWS() {
-  if (WS_URL.includes("YOUR_DENO")) {
+  if (WS_URL.includes("YOUR_RAILWAY")) {
     $('status-dot').textContent = '⚠ set WS_URL';
-    $('ws-url-note').textContent = '⚠ paste your Deno Deploy URL in index.html';
+    $('ws-url-note').textContent = '⚠ paste your Railway URL in index.html';
     useBroadcastFallback();
     return;
   }
@@ -269,7 +314,7 @@ function useBroadcastFallback() {
   $('status-dot').textContent = '● local mode';
   if (bc) bc.onmessage = (e) => handleMsg(e.data);
 }
-if (bc && WS_URL.includes("YOUR_DENO")) {
+if (bc && WS_URL.includes("YOUR_RAILWAY")) {
   bc.onmessage = (e) => handleMsg(e.data);
 }
 
@@ -282,6 +327,14 @@ function handleMsg(msg) {
       addChatMsg(null, `${msg.player.name} joined the lake house`, true);
     }
     renderPlayers();
+  } else if (msg.type === 'activity') {
+    if (players[msg.id]) {
+      players[msg.id].activity = msg.activity;
+      renderPlayers();
+      if (msg.activity && msg.id !== me?.id) {
+        addChatMsg(null, `${players[msg.id].name} is ${msg.activity}`, true);
+      }
+    }
   } else if (msg.type === 'leave') {
     const p = players[msg.id];
     if (p && msg.id !== me?.id) {
@@ -317,6 +370,7 @@ function renderPlayers() {
       el.className = 'player';
       el.dataset.pid = p.id;
       el.innerHTML = `
+        <div class="player-activity" data-activity style="display:none;"></div>
         <div class="player-bubble" data-bubble style="display:none;"></div>
         <div class="avatar-head" data-head style="background:${p.color};"></div>
         <div class="avatar-body" data-body style="background:${p.color};"></div>
@@ -331,6 +385,11 @@ function renderPlayers() {
     const bubble = el.querySelector('[data-bubble]');
     if (p.bubble) { bubble.textContent = p.bubble; bubble.style.display = 'block'; }
     else bubble.style.display = 'none';
+    const actEl = el.querySelector('[data-activity]');
+    if (actEl) {
+      if (p.activity) { actEl.textContent = p.activity.split(' ').pop(); actEl.style.display = 'block'; actEl.title = p.activity; }
+      else actEl.style.display = 'none';
+    }
   });
   Object.keys(existing).forEach(pid => { if (!seen.has(pid)) existing[pid].remove(); });
   $('player-count').textContent = Object.keys(players).length + ' online';
@@ -352,7 +411,7 @@ $('game-canvas').addEventListener('click', e => {
   const y = Math.max(8, Math.min(66, (1 - (e.clientY - rect.top) / rect.height) * 100));
   me.x = x; me.y = y;
   players[me.id] = { ...me };
-  send({ type: 'move', player: { ...me } });
+  send({ type: 'move', player: { id: me.id, name: me.name, color: me.color, x: me.x, y: me.y, activity: me.activity || null } });
   renderPlayers();
   const zone = getZone(x, y);
   if (zone) {
@@ -426,9 +485,67 @@ $('join-btn').onclick = () => {
 $('name-input').onkeydown = e => { if (e.key === 'Enter') $('join-btn').click(); };
 
 // Init WS URL note
-$('ws-url-note').textContent = WS_URL.includes('YOUR_DENO')
-  ? '⚠ paste your Deno Deploy URL in WS_URL'
+$('ws-url-note').textContent = WS_URL.includes('YOUR_RAILWAY')
+  ? '⚠ paste your Railway URL in WS_URL'
   : 'connecting...';
+
+// ── Activity Menu ─────────────────────────────────────────────────────────────
+const actBtn = $('activity-btn');
+const actMenu = $('activity-menu');
+
+// Toggle menu open/close
+actBtn.onclick = (e) => {
+  e.stopPropagation();
+  actMenu.classList.toggle('open');
+};
+
+// Close menu on outside click
+document.addEventListener('click', () => actMenu.classList.remove('open'));
+actMenu.addEventListener('click', e => e.stopPropagation());
+
+// Sub-menu toggles (smoke, fish)
+document.querySelectorAll('.act-btn.has-sub').forEach(btn => {
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    const subId = btn.dataset.sub;
+    const sub = $(subId);
+    const wasOpen = sub.classList.contains('open');
+    // Close all subs first
+    document.querySelectorAll('.act-sub').forEach(s => s.classList.remove('open'));
+    if (!wasOpen) sub.classList.add('open');
+  };
+});
+
+// Activity selection
+document.querySelectorAll('.act-btn[data-activity]').forEach(btn => {
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    if (!me) return;
+    const activity = btn.dataset.activity;
+    me.activity = activity;
+    players[me.id] = { ...me };
+    send({ type: 'activity', id: me.id, activity });
+    addChatMsg(null, `${me.name} is ${activity}`, true);
+    renderPlayers();
+    actMenu.classList.remove('open');
+    // Update button label
+    const emoji = activity.split(' ').pop();
+    actBtn.textContent = emoji + ' ' + activity.split(' ').slice(0,-1).join(' ').substring(0,12);
+  };
+});
+
+// Clear activity
+$('clear-activity').onclick = (e) => {
+  e.stopPropagation();
+  if (!me) return;
+  me.activity = null;
+  players[me.id] = { ...me };
+  send({ type: 'activity', id: me.id, activity: null });
+  renderPlayers();
+  actBtn.textContent = '🎯 activity';
+  actMenu.classList.remove('open');
+};
+
 </script>
 </body>
 </html>
