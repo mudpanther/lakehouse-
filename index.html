@@ -805,7 +805,7 @@ function handleMsg(msg){
   }else if(msg.type==='welcome'){
     if(msg.economy){myEconomy={...myEconomy,...msg.economy};updateBucksDisplay();}
     if(msg.weather)setWeather(msg.weather);
-    if(msg.gameTime!==undefined){gameTime=msg.gameTime;updateTimeDisplay();}
+    gameTime=720;updateTimeDisplay();
     if(msg.leaderboard){lbData=msg.leaderboard;}
   }else if(msg.type==='economy-update'){
     myEconomy={...myEconomy,...msg.economy};updateBucksDisplay();
