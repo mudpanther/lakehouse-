@@ -882,23 +882,6 @@ function updateBucksDisplay(){
 function getZone(x,y){for(const[,z]of Object.entries(ZONES))if(x>=z.x[0]&&x<=z.x[1]&&y>=z.y[0]&&y<=z.y[1])return z.label;return null;}
 
 // ── Weather ───────────────────────────────────────────────────────────────────
-function setWeather(w){
-  currentWeather=w;
-  const ov=$('weather-overlay');ov.innerHTML='';
-  const pill=$('weather-pill');
-  if(w==='rain'||w==='storm'){
-    pill.textContent=w==='storm'?'⛈️ STORM':'🌧️ RAIN';
-    const count=w==='storm'?80:40;
-    for(let i=0;i<count;i++){
-      const d=document.createElement('div');d.className='rain-drop';
-      d.style.cssText=`left:${Math.random()*100}%;top:0;height:${8+Math.random()*12}px;animation-duration:${0.4+Math.random()*.4}s;animation-delay:${Math.random()*.5}s;`;
-      ov.appendChild(d);
-    }
-    if(w==='storm')ov.style.background='rgba(20,20,40,.15)';
-  }else if(w==='foggy'){pill.textContent='🌫️ FOGGY';ov.style.background='rgba(200,200,220,.12)';
-  }else{pill.textContent='🌤️ CLEAR';ov.style.background='transparent';}
-  addChat(null,`Weather changed: ${pill.textContent}`,true);
-}
 
 function updateTimeDisplay(){
   const hours=Math.floor(gameTime/60);
