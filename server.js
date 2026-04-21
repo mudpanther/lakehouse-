@@ -10,7 +10,7 @@ const leaderboard = { fish: [], bucks: [], time: [] };
 
 let weather = "clear";
 let weatherTimer = null;
-let gameTime = 0; // 0-1440 minutes in a day, synced
+let gameTime = 720; // 0-1440 minutes in a day, synced
 let timeInterval = null;
 
 // Weather cycle
