@@ -231,17 +231,17 @@ wss.on("connection", (ws) => {
       // Poker
       if (msg.type === "poker-join" && clientId) {
         if (!pokerGame) {
-          // Collect players who want to join - wait for 2+
-          if (!ws._pokerWaiting) ws._pokerWaiting = true;
+          ws._pokerWaiting = true;
           const waiting = [];
           clients.forEach(({ ws: cws }, id) => { if (cws._pokerWaiting) waiting.push(id); });
+          broadcastAll({ type: "announcement", text: `♠ ${clients.get(clientId)?.player?.name} joined poker (${waiting.length}/2 players)`, color: "#cc44ff" });
+          ws.send(JSON.stringify({ type: "poker-waiting", count: waiting.length }));
           if (waiting.length >= 2) {
             waiting.forEach(id => { const c = clients.get(id); if(c) c.ws._pokerWaiting = false; });
-            startPoker(waiting);
-          } else {
-            ws.send(JSON.stringify({ type: "poker-waiting", count: waiting.length }));
-            broadcastAll({ type: "announcement", text: `♠ ${clients.get(clientId)?.player?.name} is looking for a poker game!`, color: "#cc44ff" });
+            startPoker(waiting.slice(0,4));
           }
+        } else {
+          ws.send(JSON.stringify({ type: "error", msg: "A game is already in progress!" }));
         }
       }
 
