@@ -730,7 +730,7 @@ let me=null,players={},ws=null,myBubbleTimer=null;
 let myEconomy={bucks:100,fishCaught:0,gamesWon:0,timeOnline:0,hats:[],equippedHat:null};
 let currentWeather='clear',gameTime=720,lbData={};
 let slotsBet=10,slotsSpinning=false;
-let fishing=false,fishInterval=null;
+let fishing=false,fishInterval=null,pokerPot=0;
 const $=id=>document.getElementById(id);
 
 const SLOT_SYMBOLS=['🍒','🍋','🍊','⭐','💎','7️⃣','🎰'];
@@ -816,7 +816,7 @@ function handleMsg(msg){
   }else if(msg.type==='tv'){
     loadTV(msg.url);
     if(msg.id!==me?.id)addChat(null,`${players[msg.id]?.name||'someone'} put on a video`,true);
-  }else if(msg.type==='poker-hand'){
+  }else if(msg.type==='poker-deal'){
     renderPokerHand(msg);
   }else if(msg.type==='poker-state'){
     renderPokerState(msg);
@@ -1065,12 +1065,44 @@ $('spin-btn').onclick=()=>{
 
 // ── Poker ─────────────────────────────────────────────────────────────────────
 let myPokerHand=[];
-$('poker-join-btn').onclick=()=>{if(!me)return;send({type:'poker-join'});$('poker-status').textContent='Waiting for another player... (need 2)';addChat(null,'You joined the poker queue — need 1 more player!',true);};
+$('poker-join-btn').onclick=()=>{if(!me)return;send({type:'poker-join'});$('poker-status').textContent='Joined queue — need 1 more player...';$('poker-join-btn').disabled=true;addChat(null,'Joined poker queue! Need 1 more player.',true);};
 function cardHTML(card){if(!card||card==='back')return`<div class="card back"></div>`;if(card==='empty')return`<div class="card empty"></div>`;const suit=card.slice(-1);const isRed=suit==='♥'||suit==='♦';return`<div class="card ${isRed?'red':''}">${card}</div>`;}
-function renderPokerHand(msg){myPokerHand=msg.hand||[];$('poker-table').style.display='block';$('poker-join-btn').style.display='none';$('my-hand').innerHTML=myPokerHand.map(cardHTML).join('');$('poker-pot').textContent=`POT: ${msg.pot} 🪙`;$('poker-community').innerHTML=(msg.community&&msg.community.length?msg.community.map(cardHTML).join(''):'<div style='font-size:8px;color:#446;padding:8px;'>Waiting for flop...</div>');$('poker-status').textContent=msg.currentPlayer===me?.id?'YOUR TURN – make a move!':'Waiting for opponent...';$('poker-actions').innerHTML=msg.currentPlayer===me?.id?`<button class="px-btn red" onclick="pokerAction('fold')">FOLD</button><button class="px-btn green" onclick="pokerAction('call')">CALL +20</button><button class="px-btn" onclick="pokerAction('raise')">RAISE +40</button>`:'';addChat(null,'Poker started! Your hand: '+myPokerHand.join(' '),true);}
-function renderPokerState(msg){$('poker-pot').textContent=`POT: ${msg.pot} 🪙`;$('poker-community').innerHTML=msg.community.map(cardHTML).join('')+'<div class="card empty"></div>'.repeat(5-msg.community.length);$('poker-players-row').innerHTML=msg.players.map(p=>`<div class="poker-player-chip ${p.id===msg.currentPlayer?'active':''} ${p.folded?'folded':''}">${p.name} (${p.bet}🪙)</div>`).join('');const isMyTurn=msg.currentPlayer===me?.id;$('poker-status').textContent=isMyTurn?'YOUR TURN – make a move!':msg.players.find(p=>p.id===msg.currentPlayer)?.name+"'s turn";if(isMyTurn){$('poker-actions').innerHTML=`<button class="px-btn" onclick="pokerAction('fold')">FOLD</button><button class="px-btn green" onclick="pokerAction('call')">CALL</button><button class="px-btn" onclick="pokerAction('raise')">RAISE</button>`;}else{$('poker-actions').innerHTML='';}}
-function pokerAction(action){send({type:'poker-action',action});}
-window.pokerAction=pokerAction;
+
+function renderPokerHand(msg){
+  myPokerHand=msg.hand||[];
+  $('poker-table').style.display='block';
+  $('poker-join-btn').style.display='none';
+  $('my-hand').innerHTML=myPokerHand.map(cardHTML).join('');
+  updatePokerUI(msg);
+  addChat(null,'Poker started! Your hand: '+myPokerHand.join(' '),true);
+}
+function updatePokerUI(msg){
+  const pot=msg.pot!==undefined?msg.pot:pokerPot;
+  pokerPot=pot;
+  $('poker-pot').textContent='POT: '+pot+' coins';
+  const comm=msg.community||[];
+  const empties=Array(Math.max(0,5-comm.length)).fill('<div class="card empty"></div>').join('');
+  $('poker-community').innerHTML=comm.length?comm.map(cardHTML).join('')+empties:'<div style="font-size:7px;color:#446;padding:8px;">Waiting for flop...</div>';
+  const myTurn=msg.currentPlayer===me?.id;
+  const turnName=(msg.players||[]).find(p=>p.id===msg.currentPlayer)?.name||'opponent';
+  $('poker-status').textContent=myTurn?'>> YOUR TURN – make a move!':turnName+"'s turn";
+  $('poker-players-row').innerHTML=(msg.players||[]).map(function(p){
+    var cls='poker-player-chip'+(p.id===msg.currentPlayer?' active':'')+(p.folded?' folded':'');
+    return '<div class="'+cls+'">'+esc(p.name)+(p.id===me?.id?' *':'')+'</div>';
+  }).join('');
+  if(myTurn){
+    $('poker-actions').innerHTML='<button class="px-btn red" onclick="pokerAction(\'fold\')">FOLD</button> <button class="px-btn green" onclick="pokerAction(\'call\')">CALL +20</button> <button class="px-btn" onclick="pokerAction(\'raise\')">RAISE +40</button>';
+  }else{
+    $('poker-actions').innerHTML='';
+  }
+}
+function renderPokerState(msg){
+  if($('poker-table').style.display==='none'||$('poker-table').style.display===''){
+    $('poker-table').style.display='block';
+    $('poker-join-btn').style.display='none';
+  }
+  updatePokerUI(msg);
+}
 function renderPokerEnd(msg){const win=msg.winner===me?.id;showAnnouncement(win?`🃏 YOU WIN ${msg.pot} BUCKS!`:`♠ ${msg.winnerName} wins ${msg.pot} bucks!`,win?'#aaffaa':'#ffcc44');$('poker-table').style.display='none';$('poker-join-btn').style.display='block';$('poker-join-btn').disabled=false;$('poker-status').textContent='Game over. Join a new game?';myPokerHand=[];}
 
 // ── Leaderboard ───────────────────────────────────────────────────────────────
