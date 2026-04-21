@@ -38,7 +38,7 @@ body{background:#1a0a00;display:flex;align-items:center;justify-content:center;m
 #weather-overlay{position:absolute;inset:0;pointer-events:none;z-index:3;transition:background .5s;}
 .rain-drop{position:absolute;width:2px;background:rgba(150,180,255,.6);animation:rain-fall linear infinite;}
 @keyframes rain-fall{from{transform:translateY(-20px)}to{transform:translateY(110vh)}}
-#night-overlay{position:absolute;inset:0;pointer-events:none;z-index:2;background:rgba(0,0,40,0);transition:background 3s;}
+#night-overlay{display:none;}
 
 /* ── PIXEL SCENE ── */
 .px-sky{position:absolute;top:0;left:0;right:0;height:44%;}
@@ -904,11 +904,9 @@ function updateTimeDisplay(){
   const hours=Math.floor(gameTime/60);
   const isNight=hours<6||hours>=20;
   const isDusk=(hours>=18&&hours<20)||(hours>=6&&hours<8);
-  const night=$('night-overlay');
-  const sun=$('px-sun'),moon=$('px-moon');
-  if(isNight){night.style.background='rgba(0,0,30,.55)';sun.style.opacity='0';moon.style.opacity='1';$('time-pill').textContent='🌙 NIGHT';}
-  else if(isDusk){night.style.background='rgba(30,10,0,.2)';sun.style.opacity='.5';moon.style.opacity='0';$('time-pill').textContent='🌅 DUSK';}
-  else{night.style.background='rgba(0,0,0,0)';sun.style.opacity='1';moon.style.opacity='0';$('time-pill').textContent='☀️ DAY';}
+  if(isNight)$('time-pill').textContent='🌙 NIGHT';
+  else if(isDusk)$('time-pill').textContent='🌅 DUSK';
+  else $('time-pill').textContent='☀️ DAY';
 }
 
 // ── Announcement ──────────────────────────────────────────────────────────────
