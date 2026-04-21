@@ -56,7 +56,7 @@ function cycleWeather() {
   broadcastAll({ type: "weather", weather });
   setTimeout(cycleWeather, 120000 + Math.random() * 180000);
 }
-setTimeout(cycleWeather, 120000);
+// weather disabled
 
 // ── Time ──────────────────────────────────────────────────────────────────────
 setInterval(() => {
@@ -134,26 +134,34 @@ function pokerStateMsg() {
 function pokerNextTurn() {
   const active = pokerGame.playerIds.filter(id => !pokerGame.folded.has(id));
 
-  // If only one player left, they win
+  // Only one left — win by fold
   if (active.length <= 1) {
     pokerEnd(active[0] || pokerGame.playerIds[0], 'fold');
     return;
   }
 
-  // All active players have acted — advance phase
+  // Everyone active has acted — move to next phase
   if (pokerGame.acted.size >= active.length) {
     pokerGame.acted.clear();
+    pokerGame.turnIndex = pokerGame.playerIds.indexOf(active[0]); // reset to first active
     pokerAdvancePhase();
     return;
   }
 
-  // Advance turn index to next active player
+  // Move to next active player
+  let next = pokerGame.turnIndex;
+  let safety = 0;
   do {
-    pokerGame.turnIndex = (pokerGame.turnIndex + 1) % pokerGame.playerIds.length;
-  } while (pokerGame.folded.has(pokerGame.playerIds[pokerGame.turnIndex]));
+    next = (next + 1) % pokerGame.playerIds.length;
+    safety++;
+  } while (pokerGame.folded.has(pokerGame.playerIds[next]) && safety < 10);
+  pokerGame.turnIndex = next;
 
+  sendPokerUpdate();
+}
+
+function sendPokerUpdate() {
   broadcastAll(pokerStateMsg());
-  // Re-send hands with updated state
   pokerGame.playerIds.forEach(id => {
     sendTo(id, {
       type: 'poker-deal',
@@ -162,7 +170,11 @@ function pokerNextTurn() {
       phase: pokerGame.phase,
       community: pokerGame.community,
       currentPlayer: pokerGame.playerIds[pokerGame.turnIndex],
-      players: pokerGame.playerIds.map(pid => ({ id: pid, name: clients.get(pid)?.player?.name, folded: pokerGame.folded.has(pid) }))
+      players: pokerGame.playerIds.map(pid => ({
+        id: pid,
+        name: clients.get(pid)?.player?.name || pid,
+        folded: pokerGame.folded.has(pid)
+      }))
     });
   });
 }
@@ -196,19 +208,7 @@ function pokerAdvancePhase() {
   while (pokerGame.folded.has(pokerGame.playerIds[pokerGame.turnIndex])) {
     pokerGame.turnIndex = (pokerGame.turnIndex + 1) % pokerGame.playerIds.length;
   }
-
-  broadcastAll(pokerStateMsg());
-  pokerGame.playerIds.forEach(id => {
-    sendTo(id, {
-      type: 'poker-deal',
-      hand: pokerGame.hands[id],
-      pot: pokerGame.pot,
-      phase: pokerGame.phase,
-      community: pokerGame.community,
-      currentPlayer: pokerGame.playerIds[pokerGame.turnIndex],
-      players: pokerGame.playerIds.map(pid => ({ id: pid, name: clients.get(pid)?.player?.name, folded: pokerGame.folded.has(pid) }))
-    });
-  });
+  sendPokerUpdate();
 }
 
 function pokerEnd(winnerId, reason, reveal) {
