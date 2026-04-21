@@ -502,7 +502,7 @@ body{background:#1a0a00;display:flex;align-items:center;justify-content:center;m
   <div class="hud-pill" id="player-count">0 ONLINE</div>
   <div class="hud-pill" id="status-dot">CONNECTING...</div>
   <div class="hud-pill" id="time-pill">☀️ DAY</div>
-  <div class="hud-pill" id="weather-pill">🌤️ CLEAR</div>
+  <div class="hud-pill" id="weather-pill" style="display:none;">🌤️ CLEAR</div>
 </div>
 
 <!-- Reactions -->
@@ -799,12 +799,12 @@ function handleMsg(msg){
   }else if(msg.type==='reaction'){
     spawnReaction(msg.id,msg.emoji);
   }else if(msg.type==='weather'){
-    setWeather(msg.weather);
+    // weather disabled
   }else if(msg.type==='time'){
     gameTime=msg.gameTime;updateTimeDisplay();
   }else if(msg.type==='welcome'){
     if(msg.economy){myEconomy={...myEconomy,...msg.economy};updateBucksDisplay();}
-    if(msg.weather)setWeather(msg.weather);
+    // weather disabled
     gameTime=720;updateTimeDisplay();
     if(msg.leaderboard){lbData=msg.leaderboard;}
   }else if(msg.type==='economy-update'){
